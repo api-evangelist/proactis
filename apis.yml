@@ -1,88 +1,41 @@
+aid: proactis
 name: Proactis
-description: Proactis provides procurement and spend management solutions including purchase-to-pay, e-sourcing, contract management, and spend analytics software for organizations.
-image: https://www.proactis.com/wp-content/uploads/2021/03/proactis-logo.svg
-url: https://www.proactis.com
-created: 2025-01-20 00:00:00+00:00
-modified: 2025-01-20 00:00:00+00:00
-specificationVersion: '0.18'
-apis:
-- name: Proactis P2P API
-  description: API for Purchase-to-Pay operations including requisitions, purchase orders, invoices, and supplier management.
-  image: https://www.proactis.com/wp-content/uploads/2021/03/proactis-logo.svg
-  humanURL: https://www.proactis.com/products/purchase-to-pay/
-  baseURL: https://api.proactis.com/p2p
-  tags:
+description: >-
+  Proactis provides procurement and spend management solutions including
+  purchase-to-pay, e-sourcing, contract management, and spend analytics
+  software for organizations.
+type: Index
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+tags:
   - Procurement
-  - Purchase Orders
-  - Invoices
-  - Suppliers
-  properties:
-  - type: Documentation
-    url: https://developer.proactis.com/p2p-api/documentation
-  - type: OpenAPI
-    url: https://api.proactis.com/p2p/openapi.json
-  - type: Authentication
-    url: https://developer.proactis.com/authentication
-- name: Proactis Spend Analytics API
-  description: API for accessing spend data, analytics, and reporting functionality.
-  image: https://www.proactis.com/wp-content/uploads/2021/03/proactis-logo.svg
-  humanURL: https://www.proactis.com/products/spend-analytics/
-  baseURL: https://api.proactis.com/analytics
-  tags:
-  - Analytics
-  - Reporting
-  - Spend Analysis
-  properties:
-  - type: Documentation
-    url: https://developer.proactis.com/analytics-api/documentation
-  - type: OpenAPI
-    url: https://api.proactis.com/analytics/openapi.json
-- name: Proactis Sourcing API
-  description: API for e-sourcing operations including RFx processes, auctions, and supplier responses.
-  image: https://www.proactis.com/wp-content/uploads/2021/03/proactis-logo.svg
-  humanURL: https://www.proactis.com/products/sourcing/
-  baseURL: https://api.proactis.com/sourcing
-  tags:
-  - Sourcing
-  - RFQ
-  - RFP
-  - Auctions
-  properties:
-  - type: Documentation
-    url: https://developer.proactis.com/sourcing-api/documentation
-  - type: OpenAPI
-    url: https://api.proactis.com/sourcing/openapi.json
-- name: Proactis Contract Management API
-  description: API for managing contracts, obligations, and contract lifecycle processes.
-  image: https://www.proactis.com/wp-content/uploads/2021/03/proactis-logo.svg
-  humanURL: https://www.proactis.com/products/contract-management/
-  baseURL: https://api.proactis.com/contracts
-  tags:
-  - Contracts
+  - Spend Management
+  - Purchase-to-Pay
   - Contract Management
-  - Obligations
-  properties:
-  - type: Documentation
-    url: https://developer.proactis.com/contracts-api/documentation
-  - type: OpenAPI
-    url: https://api.proactis.com/contracts/openapi.json
+url: >-
+  https://raw.githubusercontent.com/api-evangelist/proactis/refs/heads/main/apis.yml
+created: '2026-03-16'
+modified: '2026-03-16'
+specificationVersion: '0.19'
+apis:
+  - aid: proactis:proactis
+    name: Proactis API
+    description: >-
+      Proactis procurement and spend management API for purchase-to-pay,
+      sourcing, and contract management.
+    humanURL: https://www.proactis.com/
+    tags:
+      - Procurement
+      - Spend Management
+    properties:
+      - type: Documentation
+        url: https://www.proactis.com/
 common:
-- type: Portal
-  url: https://developer.proactis.com
-- type: Authentication
-  url: https://developer.proactis.com/authentication
-- type: Getting Started
-  url: https://developer.proactis.com/getting-started
-- type: Rate Limits
-  url: https://developer.proactis.com/rate-limits
-- type: Support
-  url: https://www.proactis.com/support
-- type: Contact
-  url: https://www.proactis.com/contact
-- type: Terms of Service
-  url: https://www.proactis.com/terms
-- type: Privacy Policy
-  url: https://www.proactis.com/privacy
+  - type: Website
+    url: https://www.proactis.com/
+  - type: Support
+    url: https://www.proactis.com/support/
+  - type: Privacy Policy
+    url: https://www.proactis.com/privacy-policy/
 maintainers:
-- FN: API Evangelist
-  email: info@apievangelist.com
+  - FN: Kin Lane
+    email: kin@apievangelist.com
