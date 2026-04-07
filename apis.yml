@@ -7,10 +7,10 @@ description: >-
 type: Index
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 tags:
-  - Procurement
-  - Spend Management
-  - Purchase-to-Pay
   - Contract Management
+  - Procurement
+  - Purchase-To-Pay
+  - Spend Management
 url: >-
   https://raw.githubusercontent.com/api-evangelist/proactis/refs/heads/main/apis.yml
 created: '2026-03-16'
