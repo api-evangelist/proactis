@@ -34,7 +34,7 @@ common:
     url: https://www.proactis.com/
   - type: Support
     url: https://www.proactis.com/support/
-  - type: Privacy Policy
+  - type: PrivacyPolicy
     url: https://www.proactis.com/privacy-policy/
 maintainers:
   - FN: Kin Lane
