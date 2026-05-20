@@ -30,6 +30,10 @@ apis:
       - type: Documentation
         url: https://www.proactis.com/
 common:
+  - type: GitHubOrganization
+    url: https://github.com/proactis-documentation
+  - type: LinkedIn
+    url: https://www.linkedin.com/company/proactis-group
   - type: Website
     url: https://www.proactis.com/
   - type: Support
