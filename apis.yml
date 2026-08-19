@@ -27,7 +27,7 @@ url: >-
   https://raw.githubusercontent.com/api-evangelist/proactis/refs/heads/main/apis.yml
 created: '2026-03-16'
 modified: '2026-03-16'
-specificationVersion: '0.19'
+specificationVersion: '0.23'
 apis:
   - aid: proactis:proactis
     name: Proactis API
