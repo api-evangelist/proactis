@@ -1,0 +1,197 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/apis/overview
+provider: Proactis
+providerId: proactis
+name: Proactis standards conformance
+description: >-
+  Proactis is a standards-dense provider by the nature of its market: rather than inventing a
+  proprietary payload for each document type, it adopts the established B2B interchange
+  standards for procurement — cXML for transactional documents, UBL 2.1 for eInvoicing, SCIM 2.0
+  for identity, HR-XML for timecards — on top of OAuth 2.0 for access. The important caveat runs
+  through every entry below: each of these is declared in DOCUMENTATION and visible in URL paths,
+  but Proactis publishes no fetchable machine-readable contract, so none of it is declared in a
+  contract a consumer or a scanner can read.
+
+standards:
+  - id: oauth2
+    name: OAuth 2.0 (RFC 6749)
+    conforms: true
+    profile: client credentials grant
+    evidence: >-
+      "The Proactis APIs use the OAuth 2.0 standard ... supports the Client Credentials grant
+      type." Access tokens are issued by Amazon Cognito (iss cognito-idp.eu-west-2.amazonaws.com),
+      token_type Bearer, expires_in 3600. Token request is a form-encoded POST with HTTP Basic
+      client authentication.
+    source: https://docs.proactis.com/using-the-api/authentication
+    gaps:
+      - >-
+        No /.well-known/oauth-authorization-server or /.well-known/openid-configuration is served
+        on any Proactis host, so the authorization server is not discoverable — endpoints, scopes
+        and grant types must be read from prose.
+
+  - id: oidc
+    name: OpenID Connect
+    conforms: false
+    evidence: >-
+      Only the client-credentials grant is supported, which is machine-to-machine and carries no
+      end-user identity. No id_token, no userinfo endpoint, no discovery document.
+
+  - id: scim
+    name: SCIM 2.0 — System for Cross-domain Identity Management
+    conforms: true
+    signature_type: domain-standard
+    evidence: >-
+      The User API is served at the SCIM base path /scim/v1 on every regional host, and Proactis
+      states "Proactis user API uses the SCIM 2.0 standard", citing scim.cloud. It documents the
+      SCIM resource model in both halves — Users (POST create, GET retrieve with filter and
+      pagination, PATCH or PUT modify, DELETE) and Groups, where SCIM groups are mapped onto
+      Proactis Department Master roles. PATCH support alongside PUT is the SCIM-specific detail
+      that distinguishes a real implementation from a REST user API described as SCIM.
+    source: https://docs.proactis.com/apis/user-api/overview
+    evidence_class: documentation-and-url-path
+    gaps:
+      - >-
+        NOT DECLARED IN A CONTRACT. The urn:ietf:params:scim:schemas:core:2.0:User /
+        urn:ietf:params:scim:api:messages:2.0:ListResponse schema URNs are the machine-readable
+        signature of SCIM conformance, and they can only travel in a spec or a live response.
+        Proactis publishes neither an OpenAPI a consumer can fetch nor the SCIM
+        /ServiceProviderConfig, /Schemas and /ResourceTypes discovery endpoints the standard
+        defines. An identity provider evaluating Proactis for SCIM provisioning cannot confirm
+        conformance without credentials.
+      - >-
+        /ServiceProviderConfig is not documented, so supported filter operators, bulk support,
+        PATCH support, ETag support and max results are undiscoverable.
+
+  - id: cxml
+    name: cXML (commerce XML)
+    conforms: true
+    signature_type: domain-standard
+    versions_observed: ['1.2.011', '1.2.021']
+    evidence: >-
+      "most Proactis APIs use the cXML message standard", with Proactis referring integrators to
+      the cXML User's Guide at xml.cxml.org. Published sample payloads carry the cXML DOCTYPE
+      (http://xml.cXML.org/schemas/cXML/1.2.021/Fulfill.dtd), a cXML version attribute, payloadID
+      and timestamp, and standard Header/From/To/Sender Credential domain="NetworkId" structure.
+      Push responses are themselves cXML Response/Status documents whose code attribute Proactis
+      reads to mark delivery success.
+    applies_to: [Invoice API, Order API, Receipt API, Requisition API, Supplier API]
+    source: https://docs.proactis.com/apis/invoice-api/overview
+    evidence_class: documentation-and-published-payloads
+    note: >-
+      cXML is the dominant procurement interchange standard and its use here is genuine, not
+      nominal — supplier create/update/delete intent is expressed through the cXML
+      OrganizationChangeMessage attribute rather than the HTTP verb.
+
+  - id: ubl
+    name: UBL 2.1 (OASIS Universal Business Language)
+    conforms: true
+    signature_type: domain-standard
+    evidence: >-
+      "Proactis eInvoice API uses the UBL message standard", referring integrators to the OASIS
+      UBL 2.1 specification. Invoices are imported as UBL 2.1 documents via POST (operation
+      sendInvoice) and the API responds with a UBL response. Each invoice requires at least one
+      line item.
+    applies_to: [eInvoice API]
+    source: https://docs.proactis.com/apis/einvoice-api/overview
+    evidence_class: documentation
+
+  - id: hr-xml
+    name: HR-XML / HR Open Standards
+    conforms: partial
+    evidence: >-
+      The Timecard API reference exposes a "Validate Time Card HRXML" operation group alongside
+      Timecard, Timecard Imports and Timecard Communication Settings, indicating HR-XML timecard
+      payloads. The prose documentation does not name the HR-XML version.
+    applies_to: [Timecard API]
+    source: https://docs.proactis.com/timecard-api
+    evidence_class: reference-navigation-only
+
+  - id: iso8601
+    name: ISO 8601 date and time
+    conforms: true
+    evidence: >-
+      lastModified values and the dateTimeFrom filter use ISO 8601 with offsets. Release 9.6.8
+      explicitly broadened the Invoice payment endpoint to accept yyyy-MM-dd'T'HH:mm:ssZ and
+      yyyy-MM-dd'T'HH:mm:ssXXX in addition to the offset-free forms.
+    source: https://docs.proactis.com/changelog/9.6.8
+
+  - id: rfc9457
+    name: RFC 9457 Problem Details for HTTP APIs
+    conforms: false
+    evidence: >-
+      Errors use a proprietary {status, message, details} envelope in JSON, XML or cXML. No
+      application/problem+json media type and no type URI.
+    source: https://docs.proactis.com/using-the-api/troubleshooting/status-codes
+
+  - id: pagination
+    name: Documented pagination
+    conforms: true
+    evidence: >-
+      Page-number pagination with pageNumber and pageSize request parameters (default 25, max 50)
+      and pageNumber/pageSize/totalElements/content response fields, documented with worked
+      XML and JSON examples.
+    source: https://docs.proactis.com/using-the-api/pagination
+
+  - id: idempotency
+    name: Idempotency keys
+    conforms: false
+    evidence: >-
+      No idempotency header, deduplication window or safe-retry contract is documented anywhere,
+      despite the docs instructing clients to retry on 429 and despite transactional imports
+      being asynchronous. See conventions/proactis-conventions.yml.
+    source: https://docs.proactis.com/using-the-api/troubleshooting/rate-limits
+
+  - id: odata
+    name: OData
+    conforms: false
+    evidence: No $metadata surface and no OData query syntax; filtering is bespoke query parameters.
+
+  - id: json-api
+    name: JSON:API
+    conforms: false
+    evidence: Responses are plain JSON or XML objects with no JSON:API document structure.
+
+  - id: fhir
+    name: FHIR
+    conforms: false
+    evidence: Not a healthcare data provider; out of scope for this market.
+
+  - id: psd2
+    name: PSD2 / Open Banking
+    conforms: false
+    evidence: >-
+      Proactis handles invoices and payment STATUS, not payment initiation or account access, and
+      is not a regulated payment services provider.
+
+certifications:
+  source: https://www.proactis.com/uk/about-us/accreditations-certifications/
+  method: searched
+  published: true
+  items:
+    - name: ISO/IEC 27001
+      domain: information security management
+    - name: ISO 9001
+      domain: quality management
+    - name: Cyber Essentials
+      domain: UK NCSC baseline security certification
+    - name: ISAE 3402
+      domain: service organization control assurance
+    - name: G-Cloud
+      domain: UK Crown Commercial Service framework listing
+  note: >-
+    Certification names are published on the Accreditations & Certifications page. Certificate
+    numbers, issuing bodies, scope statements and audit dates are not, and there is no trust
+    portal from which a prospective customer can download evidence — see
+    security/proactis-trust-center.yml.
+
+summary:
+  domain_standards_implemented: [scim, cxml, ubl, hr-xml]
+  domain_standard_declared_in_contract: false
+  headline_gap: >-
+    Proactis implements four separate domain interoperability standards and cannot prove any of
+    them to a machine. Everything that would let a scanner, a procurement team or an agent verify
+    conformance — an OpenAPI document, the SCIM /ServiceProviderConfig and /Schemas endpoints, a
+    published UBL or cXML profile, an OAuth discovery document — is absent. The standards work is
+    already done; only the machine-readable declaration of it is missing, which makes this one of
+    the cheaper gaps in this profile to close.

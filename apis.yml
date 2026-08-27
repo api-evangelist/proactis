@@ -1,59 +1,317 @@
 aid: proactis
 name: Proactis
 description: >-
-  Proactis provides procurement and spend management solutions including
-  purchase-to-pay, e-sourcing, contract management, and spend analytics
-  software for organizations.
+  Proactis is a source-to-pay software provider whose platform covers eSourcing, contract
+  management, supplier management, purchase-to-pay, marketplace and accounts payable automation
+  for mid-market and public-sector organisations. Its developer surface is a set of ten separate
+  REST APIs — accounting, contract, eInvoice, invoice, order, receipt, requisition, supplier,
+  timecard and user — documented at docs.proactis.com and deployed across four regional
+  environments (EU, NL, UK and US), each with a paired UAT and production estate. The APIs are
+  standards-based rather than proprietary: transactional documents move as cXML, electronic
+  invoices as UBL 2.1, identity and department master roles as SCIM 2.0, and timecards as HR-XML,
+  all behind OAuth 2.0 client-credentials tokens paired with a fixed API key. Proactis also pushes
+  transactional documents outbound to customer-configured endpoints. Access is gated: credentials
+  are issued only by Proactis support, and no machine-readable contract is published.
 type: Index
 accessModel:
-  pricing: freemium
-  onboarding: unknown
+  pricing: enterprise
+  onboarding: contact-sales
   trial: false
   try_now: false
   public: false
-  label: Freemium
-  confidence: medium
+  label: Enterprise
+  confidence: high
   source:
-  - plans
-  generated: '2026-07-22'
-  method: derived
+    - https://docs.proactis.com/using-the-api/authentication
+    - plans/proactis-plans-pricing.yml
+  generated: '2026-08-27'
+  method: searched
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/proactis.png
 tags:
-  - Contract Management
   - Procurement
   - Purchase-To-Pay
+  - Source-To-Pay
   - Spend Management
+  - Contract Management
+  - eInvoicing
+  - Accounts Payable
+  - Supplier Management
+  - eSourcing
+  - cXML
+  - UBL
+  - SCIM
 url: >-
   https://raw.githubusercontent.com/api-evangelist/proactis/refs/heads/main/apis.yml
 created: '2026-03-16'
-modified: '2026-03-16'
+modified: '2026-08-27'
 specificationVersion: '0.23'
 apis:
-  - aid: proactis:proactis
-    name: Proactis API
+  - aid: proactis:proactis-accounting
+    name: Proactis Accounting API
     description: >-
-      Proactis procurement and spend management API for purchase-to-pay,
-      sourcing, and contract management.
-    humanURL: https://www.proactis.com/
+      Configure the accounting structures that spend is coded against — departments, cost centers,
+      cost accounts and cost dimensions, plus department addresses. Master data, so records are
+      created with POST, updated with PUT and removed with DELETE, one object per request.
+    humanURL: https://docs.proactis.com/apis/accounting-api/overview
+    baseURL: https://apiuk.proactiscloud.com/accounting/v1
     tags:
+      - Accounting
+      - Master Data
       - Procurement
-      - Spend Management
     properties:
       - type: Documentation
-        url: https://www.proactis.com/
+        url: https://docs.proactis.com/apis/accounting-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/accounting-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/accounting-api/sample-messages
+  - aid: proactis:proactis-contract
+    name: Proactis Contract API
+    description: >-
+      Create contracts in Proactis from an external system. The narrowest of the ten services —
+      creation is the only capability the public documentation describes.
+    humanURL: https://docs.proactis.com/apis/contract-api/overview
+    baseURL: https://apiuk.proactiscloud.com
+    tags:
+      - Contract Management
+      - Procurement
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/contract-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/contract-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/contract-api/sample-messages
+  - aid: proactis:proactis-einvoice
+    name: Proactis eInvoice API
+    description: >-
+      Import electronic invoices created in another application into Proactis as OASIS UBL 2.1
+      documents. Each invoice requires at least one line item; the API answers with a UBL response
+      and subsequent processing is reported through the eInvoicing widgets.
+    humanURL: https://docs.proactis.com/apis/einvoice-api/overview
+    baseURL: https://apiuk.proactiscloud.com/einvoicing
+    tags:
+      - eInvoicing
+      - UBL
+      - Accounts Payable
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/einvoice-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/einvoice-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/einvoice-api/sample-messages
+  - aid: proactis:proactis-invoice
+    name: Proactis Invoice API
+    description: >-
+      Retrieve invoices from Proactis, receive them pushed to your own endpoint as they reach a
+      configured status, and write back payment information. Entry number and payment date are the
+      two fields updatable only through the API, and every change is retained in the invoice audit
+      log. Invoices fetched with GET do not include attachments; pushed invoices carry them as a
+      multipart request.
+    humanURL: https://docs.proactis.com/apis/invoice-api/overview
+    baseURL: https://apiuk.proactiscloud.com
+    tags:
+      - Invoicing
+      - Accounts Payable
+      - cXML
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/invoice-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/invoice-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/invoice-api/sample-messages
+      - type: Schema
+        url: https://docs.proactis.com/apis/invoice-api/export-definition
+  - aid: proactis:proactis-order
+    name: Proactis Order API
+    description: >-
+      Create ERP orders in Proactis and retrieve them, or have them pushed outbound as cXML. The
+      order service is the only one that supports multiple push endpoints and per-endpoint custom
+      HTTP headers, and it publishes both an import and an export cXML definition.
+    humanURL: https://docs.proactis.com/apis/order-api/overview
+    baseURL: https://apiuk.proactiscloud.com
+    tags:
+      - Purchase Orders
+      - Purchase-To-Pay
+      - cXML
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/order-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/order-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/order-api/sample-messages
+      - type: Schema
+        url: https://docs.proactis.com/apis/order-api/export-definition
+  - aid: proactis:proactis-receipt
+    name: Proactis Receipt API
+    description: >-
+      Import goods receipts against existing orders and retrieve them. Receipts are posted as cXML
+      ReceiptRequest documents referencing an order and line number, and a validation-only endpoint
+      lets a client check a payload before importing it. From release 9.6.8 receipt comments are
+      carried on both import and export.
+    humanURL: https://docs.proactis.com/apis/receipt-api/overview
+    baseURL: https://apiuk.proactiscloud.com/receipts/v1
+    tags:
+      - Receiving
+      - Purchase-To-Pay
+      - cXML
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/receipt-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/receipt-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/receipt-api/sample-messages
+      - type: Schema
+        url: https://docs.proactis.com/apis/receipt-api/export-definition
+  - aid: proactis:proactis-requisition
+    name: Proactis Requisition API
+    description: >-
+      Retrieve requisitions, receive them pushed outbound, and run budget checks. Both an import and
+      an export cXML definition are published, and requisition communication settings control the
+      single outbound endpoint.
+    humanURL: https://docs.proactis.com/apis/requisition-api/overview
+    baseURL: https://apiuk.proactiscloud.com/requisitions/v1
+    tags:
+      - Requisitions
+      - Purchase-To-Pay
+      - Budget
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/requisition-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/requisition-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/requisition-api/sample-messages
+      - type: Schema
+        url: https://docs.proactis.com/apis/requisition-api/export-definition
+  - aid: proactis:proactis-supplier
+    name: Proactis Supplier API
+    description: >-
+      Create, modify, delete and retrieve suppliers. Retrieval is paged and filterable — online
+      status, name prefix and last-modified date are all supported query parameters — while writes
+      are posted as cXML, with create, update and delete intent carried in the
+      OrganizationChangeMessage attribute rather than by HTTP verb.
+    humanURL: https://docs.proactis.com/apis/supplier-api/overview
+    baseURL: https://apiuk.proactiscloud.com/suppliers/v1
+    tags:
+      - Supplier Management
+      - Master Data
+      - cXML
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/supplier-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/supplier-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/supplier-api/sample-messages
+      - type: Schema
+        url: https://docs.proactis.com/apis/supplier-api/export-definition
+  - aid: proactis:proactis-timecard
+    name: Proactis Timecard API
+    description: >-
+      Create and retrieve timecards, with a dedicated HR-XML validation endpoint and timecard import
+      operations. Timecards are one of the five document types Proactis will push outbound to a
+      configured customer endpoint.
+    humanURL: https://docs.proactis.com/apis/timecard-api/overview
+    baseURL: https://apiuk.proactiscloud.com/timecards/v1
+    tags:
+      - Timecards
+      - Services Procurement
+      - HR-XML
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/timecard-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/timecard-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/timecard-api/sample-messages
+  - aid: proactis:proactis-user
+    name: Proactis User API (SCIM 2.0)
+    description: >-
+      Provision users and department master roles into Proactis using SCIM 2.0. Users support POST,
+      GET with filtering and pagination, PATCH or PUT, and DELETE — deletion applying only to users
+      who own no data. SCIM groups are mapped onto Proactis department master roles, and from
+      release 9.6.4 a master role carrying the Buyer access privilege grants the user the Buyer role
+      on that department automatically at import.
+    humanURL: https://docs.proactis.com/apis/user-api/overview
+    baseURL: https://apiuk.proactiscloud.com/scim/v1
+    tags:
+      - Identity
+      - SCIM
+      - User Provisioning
+    properties:
+      - type: Documentation
+        url: https://docs.proactis.com/apis/user-api/overview
+      - type: APIReference
+        url: https://docs.proactis.com/user-api
+      - type: Examples
+        url: https://docs.proactis.com/apis/user-api/sample-messages
 common:
+  - type: Website
+    url: https://www.proactis.com/
+  - type: DeveloperPortal
+    url: https://docs.proactis.com/
+  - type: Documentation
+    url: https://docs.proactis.com/
+  - type: APIReference
+    url: https://docs.proactis.com/apis/overview
+  - type: GettingStarted
+    url: https://docs.proactis.com/introduction/
+  - type: Authentication
+    url: authentication/proactis-authentication.yml
+  - type: OAuthScopes
+    url: scopes/proactis-scopes.yml
+  - type: Conventions
+    url: conventions/proactis-conventions.yml
+  - type: ErrorCatalog
+    url: errors/proactis-problem-types.yml
+  - type: RateLimits
+    url: rate-limits/proactis-rate-limits.yml
+  - type: Plans
+    url: plans/proactis-plans-pricing.yml
+  - type: Lifecycle
+    url: lifecycle/proactis-lifecycle.yml
+  - type: ChangeLog
+    url: changelog/proactis-changelog.yml
+  - type: ReleaseNotes
+    url: https://docs.proactis.com/changelog
+  - type: Conformance
+    url: conformance/proactis-conformance.yml
+  - type: Compliance
+    url: https://www.proactis.com/uk/about-us/accreditations-certifications/
+  - type: Webhooks
+    url: asyncapi/proactis-webhooks.yml
+  - type: Sandbox
+    url: sandbox/proactis-sandbox.yml
+  - type: Packages
+    url: packages/proactis-packages.yml
+  - type: DataModel
+    url: data-model/proactis-data-model.yml
+  - type: LLMsTxt
+    url: llms/proactis-llms.txt
   - type: DomainSecurity
     url: security/proactis-domain-security.yml
   - type: GitHubOrganization
     url: https://github.com/proactis-documentation
   - type: LinkedIn
     url: https://www.linkedin.com/company/proactis-group
-  - type: Website
-    url: https://www.proactis.com/
   - type: Support
     url: https://www.proactis.com/support/
+  - type: Blog
+    url: https://www.proactis.com/uk/resources/?group=resource-type&categoryIds=1568
+  - type: TermsOfService
+    url: https://www.proactis.com/us/customers/contractual-terms-and-conditions/
   - type: PrivacyPolicy
     url: https://www.proactis.com/privacy-policy/
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com
+x-enrichment:
+  date: '2026-08-27'
+  status: enriched
+  artifacts_added: 15
+  pass: local-v1

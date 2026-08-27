@@ -1,0 +1,65 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/using-the-api/authentication
+docs: https://docs.proactis.com/using-the-api/authentication
+provider: Proactis
+providerId: proactis
+name: Proactis OAuth 2.0 scopes
+description: >-
+  Proactis issues OAuth 2.0 client-credentials access tokens from Amazon Cognito. Scopes
+  are resource-server scopes expressed as absolute URIs under the
+  https://api.proactiscloud.com/ resource identifier, one per API service. The list below
+  is read from the decoded payload of the example access token Proactis publishes on its
+  own authentication page — it is what Proactis shows a client actually receives.
+flow: clientCredentials
+tokenEndpoint: >-
+  Regional. The docs example uses Host apius.proactiscloud.com; the equivalent UK, EU and
+  NL hosts are apiuk.proactiscloud.com, regos2p-eu1-api.proactiscloud.com and api.esize.nl.
+resourceServer: https://api.proactiscloud.com
+authorizationServer: https://cognito-idp.eu-west-2.amazonaws.com/<user-pool-id>
+scope_count: 6
+scopes:
+  - name: https://api.proactiscloud.com/orders
+    short: orders
+    api: Order API
+    description: Create and retrieve ERP orders.
+  - name: https://api.proactiscloud.com/invoices
+    short: invoices
+    api: Invoice API
+    description: Create or retrieve invoices and update payment status.
+  - name: https://api.proactiscloud.com/receipts
+    short: receipts
+    api: Receipt API
+    description: Create and retrieve receipts.
+  - name: https://api.proactiscloud.com/suppliers
+    short: suppliers
+    api: Supplier API
+    description: Create, modify and retrieve suppliers.
+  - name: https://api.proactiscloud.com/accounting
+    short: accounting
+    api: Accounting API
+    description: Configure departments, cost centers, cost accounts and cost dimensions.
+  - name: https://api.proactiscloud.com/einvoicing
+    short: einvoicing
+    api: eInvoice API
+    description: Import UBL 2.1 invoices into Proactis.
+gaps:
+  - >-
+    Proactis documents ten API services (accounting, contract, eInvoice, invoice, order,
+    receipt, requisition, supplier, timecard, user/SCIM) but the published example token
+    carries only six scopes. No scope URI is published for the Contract, Requisition,
+    Timecard or User (SCIM) APIs. Whether those services use additional scopes, reuse an
+    existing one, or are gated another way is not stated anywhere in the public docs.
+  - >-
+    There is no published scope reference page. Scopes had to be recovered by decoding the
+    example JWT on the authentication page. A dedicated permissions/scopes table would make
+    least-privilege token requests possible without reverse-engineering a sample.
+  - >-
+    No granularity below the service level is documented — there is no read-only vs
+    read-write split, so a token that can retrieve suppliers can also modify them.
+notes:
+  - >-
+    Scopes are also referenced in the opposite direction: when Proactis pushes documents to
+    a customer endpoint using OAUTH2, Communication Settings accept an optional space-separated
+    `scope` value for the customer's own authorization server.
+    See https://docs.proactis.com/using-the-api/transactions/push-transactions

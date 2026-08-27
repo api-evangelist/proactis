@@ -3,89 +3,104 @@ specificationVersion: '0.1'
 schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
 provider: Proactis
 providerId: proactis
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/using-the-api/troubleshooting/rate-limits
+docs: https://docs.proactis.com/using-the-api/troubleshooting/rate-limits
 created: '2026-05-04'
-# Provenance stamped 2026-08-11: this artifact was written by the API Evangelist
-# bulk sweep dated 2026-05-04, not harvested from the provider. See roadmap#35.
-method: generated
-modified: '2026-05-04'
+modified: '2026-08-27'
+# 2026-08-27: replaced the 2026-05-04 generated scaffold (which carried invented per-tier
+# quotas and an invented X-RateLimit-* header set) with the limits Proactis actually
+# publishes. The real API returns NO rate-limit headers at all.
 tags:
-  - Contract Management
   - Procurement
   - Purchase-To-Pay
-  - Spend Management
   - Rate Limiting
   - Quotas
   - Throttling
-description: Machine-readable rate limit definitions for the Proactis API surface. Captures per-tier quotas,
-  burst behavior, response signaling, and recovery semantics. Defaults are scaffold values to be replaced
-  with published provider limits.
+description: >-
+  Proactis enforces rate limits at the organization level across all endpoints, measured two
+  ways simultaneously — requests per minute and requests per day — with different daily
+  allowances for the UAT and production environments. Whichever ceiling is reached first
+  applies. Limits are the same for every customer; Proactis publishes no per-plan tiering.
+limit_count: 4
+scope: organization
+applies_to: all endpoints
+limits:
+  - name: Production requests per day
+    environment: production
+    scope: organization
+    metric: requests_per_day
+    limit: 8000
+    timeFrame: day
+    reset: midnight UTC
+    burst: null
+  - name: Production requests per minute
+    environment: production
+    scope: organization
+    metric: requests_per_minute
+    limit: 50
+    timeFrame: minute
+    reset: rolling
+    burst: null
+  - name: UAT requests per day
+    environment: uat
+    scope: organization
+    metric: requests_per_day
+    limit: 4000
+    timeFrame: day
+    reset: midnight UTC
+    burst: null
+  - name: UAT requests per minute
+    environment: uat
+    scope: organization
+    metric: requests_per_minute
+    limit: 50
+    timeFrame: minute
+    reset: rolling
+    burst: null
 headers:
-  limit: X-RateLimit-Limit
-  remaining: X-RateLimit-Remaining
-  reset: X-RateLimit-Reset
-  retryAfter: Retry-After
-  policy: RateLimit-Policy
+  limit: null
+  remaining: null
+  reset: null
+  retryAfter: null
+  policy: null
+  note: >-
+    NO RATE-LIMIT HEADERS ARE DOCUMENTED OR PUBLISHED. Proactis describes the numeric ceilings
+    but returns no X-RateLimit-*, no RateLimit-* and no Retry-After. A client therefore has no
+    runtime signal for remaining quota or reset time — it can only observe exhaustion after it
+    has already happened, by receiving a 429. For an agent this is the difference between
+    pacing itself and discovering the wall by hitting it.
 responseCodes:
   throttled: 429
   quotaExceeded: 429
-  serviceUnavailable: 503
-limits:
-  - tier: free
-    name: Free Tier Default
-    scope: api-key
-    metric: requests_per_minute
-    limit: 10
-    burst: 20
-    timeFrame: minute
-    applies:
-      - Proactis API
-  - tier: free
-    name: Free Tier Monthly Quota
-    scope: api-key
-    metric: requests_per_month
-    limit: 1000
-    timeFrame: month
-    applies:
-      - Proactis API
-  - tier: professional
-    name: Professional Tier Default
-    scope: api-key
-    metric: requests_per_minute
-    limit: 100
-    burst: 200
-    timeFrame: minute
-    applies:
-      - Proactis API
-  - tier: professional
-    name: Professional Tier Monthly Quota
-    scope: api-key
-    metric: requests_per_month
-    limit: 100000
-    timeFrame: month
-    applies:
-      - Proactis API
-  - tier: enterprise
-    name: Enterprise Negotiated Limit
-    scope: contract
-    metric: requests_per_minute
-    limit: 1000
-    burst: 5000
-    timeFrame: minute
-    applies:
-      - Proactis API
-policies:
-  - name: Backoff Strategy
-    description: Clients should implement exponential backoff with jitter, honoring the Retry-After header
-      when present.
-  - name: Burst Handling
-    description: Short bursts above the steady-state limit are tolerated up to the documented burst ceiling
-      before throttling engages.
-  - name: Quota Reset
-    description: Monthly quotas reset at the start of each calendar month in UTC. Per-minute and per-second
-      windows reset on a sliding-window basis.
-  - name: Fair Use
-    description: Even on uncapped enterprise tiers, sustained usage that materially impacts shared infrastructure
-      may be subject to fair-use throttling.
-maintainers:
-  - FN: Kin Lane
-    email: kin@apievangelist.com
+throttled_body: '{"message": "Limit Exceeded"}'
+exhaustion_behavior: >-
+  Requests received while rate limiting is active are rejected outright. "Proactis will not
+  store and process these requests at a later time" — there is no queue and no replay.
+exemptions:
+  - >-
+    Rate limits apply only to traffic initiated by the client's applications. Traffic initiated
+    by Proactis — i.e. pushed transactional documents — does not count toward the limit.
+guidance:
+  published: true
+  recommendations:
+    - Watch for 429 status codes and implement a retry mechanism on an exponential backoff schedule.
+    - >-
+      Poll incrementally with dateTimeFrom rather than re-pulling full data sets; do a full pull
+      only once, at first integration.
+    - >-
+      Use a pageSize of 25 (the default) rather than the 50 maximum — Proactis states 50 means
+      fewer calls but slower responses.
+    - Filter server-side with query parameters to reduce call volume.
+  docs: https://docs.proactis.com/using-the-api/troubleshooting/optimizing-api-calls
+notes:
+  - >-
+    50 requests/minute against an 8000/day ceiling means a client running flat out at the
+    per-minute limit exhausts the daily allowance in about 160 minutes. Combined with the
+    documented lack of bulk operations ("you can work on only one object per request"), the
+    daily ceiling — not the per-minute one — is the real constraint on any large master-data
+    or transactional sync.
+  - >-
+    Additional resource-based rate limits may apply: "There might also be other additional
+    resource-based rate limits." These are not quantified anywhere in the public docs.

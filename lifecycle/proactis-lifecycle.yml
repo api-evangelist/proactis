@@ -1,0 +1,118 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/using-the-api/change-policy
+provider: Proactis
+providerId: proactis
+name: Proactis API lifecycle
+description: >-
+  Proactis publishes a formal change policy that enumerates exactly which changes it treats as
+  breaking and which as non-breaking, and announces every change through a dated changelog tied
+  to a monthly platform release train with a per-region deployment calendar. What it does not
+  publish is a deprecation or sunset policy, an SLA, or a status page.
+
+versioning:
+  scheme: path
+  current: v1
+  note: >-
+    Service paths are pinned at /v1 and have not moved. The platform itself runs a 9.x.y release
+    train — 9.6.8 as of August 2026 — which is what the changelog tracks. Platform releases do
+    not rev the API path version.
+  docs: https://docs.proactis.com/using-the-api/change-policy
+
+change_policy:
+  published: true
+  url: https://docs.proactis.com/using-the-api/change-policy
+  announcement_channels:
+    - https://docs.proactis.com/changelog
+    - Proactis release notes
+  breaking_changes_possible: true
+  statement: >-
+    "from time to time, we may introduce breaking changes in order to improve the API"
+  non_breaking:
+    - Adding a new endpoint
+    - Adding a new optional parameter
+    - Adding an optional request header
+    - Adding a new response field
+    - Adding a response header
+    - Changing the order of response fields
+    - Changing an error message
+    - Fixing an HTTP response code
+  breaking:
+    - Removing a resource
+    - Removing an endpoint
+    - Removing a parameter
+    - Removing a response field
+    - Modifying an endpoint's URI
+    - Modifying the name of a parameter or field
+    - Modifying required parameters
+    - Adding a required parameter
+    - Changing the data type of an existing field or parameter
+    - Introducing a new validation
+  note: >-
+    The clause that most affects a client is "Changing the order of response fields" being classed
+    NON-breaking — an integration that depends on positional XML ordering is on notice — and
+    "Introducing a new validation" being classed breaking, which is unusually candid.
+
+deprecation_policy:
+  published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  advance_notice_period: not stated
+  note: >-
+    This is the notable gap in an otherwise well-governed change process. Proactis states that
+    breaking changes including endpoint and field REMOVAL do occur, and commits to announcing
+    changes via the changelog — but it publishes no notice period, no deprecation window, no
+    migration guarantee, and emits neither the RFC 8594 Sunset header nor a Deprecation header.
+    A client learns that an endpoint is going away only by reading a changelog entry, with no
+    stated minimum lead time.
+
+release_cadence:
+  frequency: monthly
+  train: 9.x.y
+  latest_release: 9.6.8
+  latest_release_date: '2026-08-01'
+  observed_range: 9.3.5 through 9.6.8
+  entries_published: 41
+  rollout: >-
+    Each release ships on a published per-region calendar with UAT first and production second.
+    For 9.6.8: NL UAT 2026-08-07 / PROD 2026-08-14; EU1, UK and US UAT 2026-08-11 / PROD 2026-08-20.
+    The NL region consistently leads the other three by several days.
+  note: >-
+    Publishing the UAT and production dates per region in advance, in the changelog itself, is the
+    strongest operational-transparency signal in this provider's developer surface.
+  see: changelog/proactis-changelog.yml
+
+status_page:
+  published: false
+  url: null
+  probed:
+    - url: https://status.proactis.com/
+      result: DNS does not resolve
+  note: >-
+    No status page, no uptime history and no incident feed could be found on any Proactis domain.
+    The docs document a 503 "temporarily offline for maintenance" response but point to no place
+    where planned or unplanned downtime is announced, beyond the release calendar.
+
+sla:
+  published: false
+  note: >-
+    No public SLA, uptime commitment or support-response target. Contractual terms are referenced
+    at https://www.proactis.com/us/customers/contractual-terms-and-conditions/ but service levels
+    are not published there.
+
+support:
+  url: https://www.proactis.com/support/
+  channels: [customer support portal, supplier support]
+  developer_channel: >-
+    No developer-specific channel, forum or community. The docs route API questions to general
+    customer support, which is also the only route to obtaining API credentials.
+
+deprecated_operations: []
+retirement_announcements: []
+
+gaps:
+  - No deprecation or sunset policy, and no Sunset/Deprecation response headers.
+  - No status page or incident history.
+  - No published SLA.
+  - No developer-specific support channel.

@@ -1,0 +1,226 @@
+generated: '2026-08-27'
+method: derived
+source: >-
+  docs.proactis.com — API overview pages, reference-navigation operation groups, and the published
+  sample payloads on the pagination, modify-data and create-transactions pages
+provider: Proactis
+providerId: proactis
+name: Proactis data model
+description: >-
+  The entity graph behind the Proactis APIs, reconstructed from the documented services, the
+  operation groups listed in each API reference, and the field names visible in the sample XML and
+  JSON payloads Proactis publishes. THIS IS A DERIVATION, NOT A HARVEST — Proactis publishes no
+  fetchable schema, so entity fields are only those actually shown in a published example or named
+  in prose, and relationships are those a document explicitly references. Fields not shown in a
+  published sample are omitted rather than guessed.
+confidence: medium
+caveat: >-
+  Attribute lists are partial by construction. Each API's real data model lives inside the Stoplight
+  Elements reference widget on docs.proactis.com, which renders client-side from a specification
+  that is not served as a fetchable file, and inside the per-API cXML export and import definition
+  pages. A complete model would require either that spec or a walk of the definition pages.
+
+entities:
+  - name: Supplier
+    api: Supplier API
+    path: /suppliers/v1/{domainId}
+    format: cXML
+    identifier: id
+    fields_observed:
+      - {name: id, type: string, example: '3ede7e6d9d0f45578e6cdc76'}
+      - {name: name, type: string}
+      - {name: number, type: string, example: 'SUP8305, note: Human-facing supplier number.'}
+      - {name: online, type: boolean, note: 'Filterable via ?online=true.'}
+      - {name: lastModified, type: datetime, note: 'ISO 8601 with offset; drives dateTimeFrom sync.'}
+    write_semantics: >-
+      Create, update and delete are all POSTs; the intent is carried by the cXML
+      OrganizationChangeMessage attribute.
+    filters: [online, name, dateTimeFrom]
+
+  - name: CostCenter
+    api: Accounting API
+    path: /accounting/v1
+    operation: upsertCostCenter
+    identifier: id
+    fields_observed:
+      - {name: id, type: string, example: 'CC-001'}
+      - {name: name, type: string}
+      - {name: description, type: string}
+      - {name: online, type: boolean}
+      - {name: erpId, type: string, note: 'Foreign key into the customer''s ERP.'}
+      - {name: departments, type: array, note: 'List of department references.'}
+      - {name: lastModified, type: datetime}
+
+  - name: CostAccount
+    api: Accounting API
+    path: /accounting/v1
+    note: Named as an operation group in the Accounting API reference. Fields not published.
+
+  - name: CostDimension
+    api: Accounting API
+    path: /accounting/v1
+    note: Named as an operation group in the Accounting API reference. Fields not published.
+
+  - name: Department
+    api: Accounting API
+    path: /accounting/v1
+    identifier: id
+    fields_observed:
+      - {name: id, type: string, example: 'A-1000'}
+    note: >-
+      The Accounting API reference also lists a separate "Department addresses" operation group,
+      implying addresses are modelled as their own child collection.
+
+  - name: DepartmentAddress
+    api: Accounting API
+    path: /accounting/v1
+    note: Distinct operation group in the Accounting API reference.
+
+  - name: Invoice
+    api: Invoice API
+    format: cXML
+    fields_observed:
+      - {name: invoiceNumber, type: string, note: 'Named as a sortField example.'}
+      - {name: entryNumber, type: string, note: 'Writable only through the API; single value.'}
+      - {name: paymentDate, type: datetime, note: 'Writable only through the API; ISO 8601, offsets accepted from 9.6.8.'}
+    statuses:
+      - CONCEPT
+      - EXCEPTION
+      - FORAPPROVAL
+      - PROCESSED
+      - CLEARED
+      - SENT
+      - ONHOLD
+      - FORVALIDATION
+      - REJECTED
+      - DELETED
+      - ARCHIVED
+      - FOREVALUATION
+    note: >-
+      The twelve statuses are the configurable export triggers for pushing invoices outbound, and are
+      the only published state machine for any Proactis entity. Attachments exist on invoices but are
+      returned only on push, never on GET.
+    audit: Changes to entryNumber and paymentDate are retained in the invoice audit log.
+
+  - name: EInvoice
+    api: eInvoice API
+    path: /einvoicing
+    format: UBL 2.1
+    operation: sendInvoice
+    constraint: Requires at least one invoice line item.
+
+  - name: Order
+    api: Order API
+    format: cXML
+    alias: ERP order
+    identifier: orderID
+    fields_observed:
+      - {name: orderID, type: string, example: '00070651'}
+      - {name: orderDate, type: datetime}
+    note: The only entity whose push configuration supports multiple endpoints and custom headers.
+
+  - name: Receipt
+    api: Receipt API
+    path: /receipts/v1
+    format: cXML ReceiptRequest
+    identifier: receiptID
+    fields_observed:
+      - {name: receiptID, type: string, example: '20230614001'}
+      - {name: receiptDate, type: datetime}
+      - {name: closeForReceiving, type: boolean, note: 'Omit unless the order line is fully received.'}
+      - {name: comments, type: string, note: 'Header-level; single on import, line-break separated on export. Added 9.6.8.'}
+
+  - name: ReceiptItem
+    api: Receipt API
+    parent: Receipt
+    fields_observed:
+      - {name: receiptLineNumber, type: integer}
+      - {name: quantity, type: number}
+      - {name: completedIndicator, type: boolean}
+      - {name: lineNumber, type: integer, note: 'The referenced ORDER line number.'}
+      - {name: supplierPartID, type: string, example: 'PEN001'}
+      - {name: unitRate, type: money, note: 'Money with currency attribute plus UnitOfMeasure.'}
+      - {name: classification, type: string, note: 'domain="ItemReceivingCondition"; values configured in Proactis.'}
+
+  - name: Requisition
+    api: Requisition API
+    path: /requisitions/v1
+    format: cXML
+
+  - name: Timecard
+    api: Timecard API
+    path: /timecards/v1
+    format: HR-XML
+
+  - name: Contract
+    api: Contract API
+    note: Creation only, per the public documentation.
+
+  - name: User
+    api: User API
+    path: /scim/v1/Users
+    standard: SCIM 2.0
+    note: >-
+      Conforms to the SCIM core user schema per Proactis's own statement, but the concrete attribute
+      set is not published and the SCIM /Schemas discovery endpoint is not exposed.
+
+  - name: Group
+    api: User API
+    path: /scim/v1/Groups
+    standard: SCIM 2.0
+    maps_to: Department master role
+    note: >-
+      A SCIM group is a Proactis department master role. Access privileges attach to the master role;
+      from 9.6.4 the Buyer privilege on a master role propagates to the user on import.
+
+  - name: CommunicationSetting
+    api: Per-service (Receipt, Requisition, Timecard and equivalents)
+    description: Outbound push endpoint configuration, one record per document type per environment.
+    fields_observed:
+      - {name: id, type: string, note: 'Endpoint name. ERP orders only.'}
+      - {name: url, type: string, note: 'http://, https://, ftp:// or sftp://'}
+      - {name: multipartContentType, type: string, default: 'multipart/mixed'}
+      - {name: contentType, type: string, default: 'application/xml'}
+      - {name: authentications, type: array}
+      - {name: headers, type: map, note: 'ERP orders only.'}
+      - {name: exportStatus, type: array, note: 'Invoice only.'}
+
+  - name: Domain
+    description: >-
+      The tenant scope. Appears as the {domainId} path segment on master-data and transactional
+      endpoints and as a cXML Credential domain="NetworkId" Identity value in document headers.
+    note: Not exposed as a resource with its own endpoints in the public documentation.
+
+relationships:
+  - {from: CostCenter, to: Department, type: has_many, via: departments}
+  - {from: CostCenter, to: ERP, type: belongs_to, via: erpId, note: 'External system reference.'}
+  - {from: Receipt, to: Order, type: belongs_to, via: OrderReference.orderID}
+  - {from: ReceiptItem, to: Receipt, type: belongs_to, via: parent document}
+  - {from: ReceiptItem, to: Order line, type: belongs_to, via: ReceiptItemReference.lineNumber}
+  - {from: ReceiptItem, to: Supplier part, type: belongs_to, via: ItemID.SupplierPartID}
+  - {from: Receipt, to: Supplier, type: belongs_to, via: 'cXML Header To Credential Identity (e.g. SUP0005)'}
+  - {from: Group, to: Department, type: has_many, via: department master role assignment}
+  - {from: User, to: Group, type: has_many, via: SCIM group membership}
+  - {from: Invoice, to: Order, type: belongs_to, via: order reference, confidence: low}
+  - {from: CommunicationSetting, to: document type, type: belongs_to, via: service}
+
+conventions:
+  identifiers: >-
+    Two id styles coexist. Master data carries customer-assigned human-readable codes (CC-001,
+    A-1000, SUP8305). Suppliers additionally carry an opaque system id (3ede7e6d9d0f45578e6cdc76,
+    HdYKA6KzrYoAAAGBJ4AAe2cf) with no type prefix, so an id alone does not identify its entity type.
+  change_tracking: >-
+    Every retrievable entity carries lastModified, and every list endpoint accepts dateTimeFrom — a
+    consistent, model-wide incremental-sync contract.
+  representation: XML and JSON for master data; cXML, UBL or HR-XML for transactional documents.
+
+gaps:
+  - >-
+    No machine-readable schema for any entity. There is no OpenAPI, no JSON Schema, no XSD linked
+    from the docs, and no SCIM /Schemas endpoint.
+  - >-
+    Complete attribute sets are unpublished for CostAccount, CostDimension, Contract, Requisition,
+    Timecard, User and Group.
+  - >-
+    Only Invoice has a documented state machine. The trigger status for pushing requisitions, orders,
+    receipts and timecards is described as fixed but is never actually named.

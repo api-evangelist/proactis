@@ -1,15 +1,33 @@
-generated: '2026-07-11'
+generated: '2026-08-27'
 method: probed
 source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
 hosts:
 - host: www.proactis.com
   https: true
   tls_version: TLSv1.3
-  cert_expires: Aug 14 03:00:26 2026 GMT
+  cert_expires: Oct 12 03:45:15 2026 GMT
+  hsts: null
+- host: docs.proactis.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 12 03:45:15 2026 GMT
+  hsts: true
+  hsts_max_age: 31536000
+- host: apiuk.proactiscloud.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov  2 23:59:59 2026 GMT
   hsts: null
 domains:
 - domain: proactis.com
   dnssec: false
   caa: []
   spf: true
-  dmarc: false
+  dmarc: true
+  dmarc_policy: quarantine
+- domain: proactiscloud.com
+  dnssec: true
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: quarantine

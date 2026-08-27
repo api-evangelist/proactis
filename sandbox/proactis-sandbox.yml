@@ -1,0 +1,76 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/introduction/
+docs: https://docs.proactis.com/using-the-api/troubleshooting/rate-limits
+provider: Proactis
+providerId: proactis
+name: Proactis UAT environment
+description: >-
+  Proactis operates a full parallel UAT environment in every region, on its own hostnames and with
+  its own rate-limit allowance. It is a genuine pre-production tier rather than a mock or a
+  playground: same API surface, same credentials model, separate data, and a release calendar that
+  puts every platform release into UAT roughly a week before production so customers can test
+  against the next version before it reaches them.
+type: pre-production-environment
+self_service: false
+access: >-
+  Not open. A UAT tenant comes with a Proactis customer relationship, and UAT credentials are
+  issued by Proactis support in the same way as production credentials. There is no public
+  sandbox, no test account signup, and no way for a developer outside a customer engagement to
+  make a single call.
+environments:
+  - region: EU
+    uat: https://regos2p-eu1-api-uat.proactiscloud.com
+    production: https://regos2p-eu1-api.proactiscloud.com
+  - region: NL
+    uat: https://api-consult.esize.nl
+    production: https://api.esize.nl
+    note: >-
+      The Netherlands region runs on the esize.nl domain rather than proactiscloud.com — a legacy
+      of the Esize acquisition. It is named as a first-class Proactis region on every API reference
+      page and receives each release several days before the other three.
+  - region: UK
+    uat: https://apiuk-uat.proactiscloud.com
+    production: https://apiuk.proactiscloud.com
+  - region: US
+    uat: https://apius-uat.proactiscloud.com
+    production: https://apius.proactiscloud.com
+rate_limits:
+  uat: {per_minute: 50, per_day: 4000}
+  production: {per_minute: 50, per_day: 8000}
+  note: UAT gets half the daily allowance; the per-minute ceiling is identical.
+configuration:
+  note: >-
+    Communication Settings — the push/webhook endpoint configuration — must be set up once per
+    environment. A UAT configuration does not carry over to production.
+  docs: https://docs.proactis.com/using-the-api/transactions/push-transactions
+release_testing:
+  description: >-
+    Each platform release is published to UAT before production on a per-region calendar stated in
+    the changelog entry itself, giving customers a stated window to test against the incoming
+    version. For 9.6.8 that window was 7 days in NL and 9 days in EU1, UK and US.
+  docs: https://docs.proactis.com/changelog
+validation_endpoints:
+  description: >-
+    Two validation-only operations let a client check a payload without committing it, in either
+    environment.
+  operations:
+    - Validate Receipt (Receipt API)
+    - Validate Time Card HRXML (Timecard API)
+test_data:
+  fixtures: none published
+  test_credentials: none published
+  magic_values: none published
+  note: >-
+    Proactis publishes no test identifiers, seeded fixtures or magic values. The sample payloads in
+    the docs use illustrative identifiers (supplier SUP0005, order 00070651, article PEN001, domain
+    "Demo") but these are documentation examples, not guaranteed-present test data.
+gaps:
+  - >-
+    No open sandbox. A developer evaluating Proactis cannot make a single call, cannot see a real
+    response shape, and cannot test an integration before a contract is signed.
+  - >-
+    No test/live key prefix convention, so a credential does not carry its environment on its face;
+    environment is determined solely by which hostname is called. There is nothing to stop a
+    misconfigured client pointing UAT logic at a production host.
+  - No published test data set or fixtures.

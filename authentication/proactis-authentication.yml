@@ -1,0 +1,77 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/using-the-api/authentication
+provider: Proactis
+providerId: proactis
+name: Proactis API authentication
+description: >-
+  Every Proactis REST API is protected by two credentials used together on the same
+  request: an OAuth 2.0 bearer access token obtained through the client credentials
+  grant, and a fixed API key sent in the x-api-key header. Credentials are issued by
+  Proactis support on request — there is no self-service client registration.
+notes:
+  - >-
+    Both credentials are required. An OAuth token alone, or an API key alone, is
+    rejected — the docs state that requests missing or carrying an incorrect token or
+    API key return 401 Unauthorized.
+  - >-
+    There is no self-service developer signup. The docs say "For initial registration
+    and to obtain OAuth 2.0 credentials, please contact Proactis support."
+  - All requests must be made over HTTPS; plain HTTP calls fail.
+securitySchemes:
+  - name: oauth2ClientCredentials
+    type: oauth2
+    flow: clientCredentials
+    description: >-
+      OAuth 2.0 client credentials grant (RFC 6749), server-to-server. The client posts
+      grant_type=client_credentials to the regional token endpoint with the client id and
+      client secret supplied as HTTP Basic credentials in the Authorization header and
+      Content-Type application/x-www-form-urlencoded.
+    tokenRequest:
+      method: POST
+      contentType: application/x-www-form-urlencoded
+      body: grant_type=client_credentials
+      clientAuthentication: basic
+      host: >-
+        Regional API host, e.g. apius.proactiscloud.com (US), apiuk.proactiscloud.com (UK),
+        regos2p-eu1-api.proactiscloud.com (EU), api.esize.nl (NL)
+    tokenResponse:
+      token_type: Bearer
+      expires_in: 3600
+      expires_in_unit: seconds
+    inHeader: 'Authorization: Bearer <access_token>'
+    identityProvider: >-
+      Amazon Cognito. The published example token carries
+      iss https://cognito-idp.eu-west-2.amazonaws.com/<pool-id>, which places the
+      authorization server in AWS Cognito in the eu-west-2 (London) region.
+    scopes: see scopes/proactis-scopes.yml
+    docs: https://docs.proactis.com/using-the-api/authentication
+  - name: apiKey
+    type: apiKey
+    in: header
+    parameterName: x-api-key
+    description: >-
+      A fixed API key issued alongside the OAuth client credentials at registration. Sent
+      on every API request in addition to the bearer token.
+    rotation: not documented
+    docs: https://docs.proactis.com/using-the-api/authentication
+tokenLifetime:
+  expires_in: 3600
+  renewal: >-
+    Access tokens have a limited validity period. On expiry the client repeats the client
+    credentials request with the same client id and secret. No refresh token is issued —
+    the client credentials grant does not use one.
+outboundAuthentication:
+  description: >-
+    Distinct from inbound API auth: when Proactis PUSHES documents to a customer endpoint,
+    the customer chooses how Proactis authenticates to THEM. Configured per endpoint in
+    Communication Settings; zero, one or several types can be combined.
+  types:
+    - BASIC
+    - USERNAME_PASSWORD
+    - OAUTH2
+    - API_KEY
+  docs: https://docs.proactis.com/using-the-api/transactions/push-transactions
+selfService: false
+mtls: false
+openIdConnect: false

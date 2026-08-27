@@ -1,0 +1,131 @@
+generated: '2026-08-27'
+method: probed
+source: live HTTP probes 2026-08-27
+provider: Proactis
+providerId: proactis
+name: Proactis /.well-known probe
+description: >-
+  Every /.well-known path was probed on both public Proactis hosts and on the regional API hosts.
+  NOTHING IS SERVED. No document was found at any path, so no WellKnown or SecurityTxt pointer is
+  emitted in apis.yml — this file records a measured absence, not a presence.
+probe_note: >-
+  proactis.com and its subdomains sit behind Cloudflare, which returns 403 with a managed-challenge
+  interstitial to a plain HTTP client regardless of path. To distinguish "challenged" from "absent"
+  each path was re-fetched through a rendering text proxy that clears the challenge; the statuses
+  below are the ORIGIN statuses observed that way. Paths marked 403-challenge could not be resolved
+  past the edge and are recorded as unresolved rather than as a miss or a hit.
+hosts:
+  - host: www.proactis.com
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+        file: null
+      - path: /.well-known/openid-configuration
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/oauth-authorization-server
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/api-catalog
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/ai-plugin.json
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/agent-card.json
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/agent.json
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /llms.txt
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+  - host: docs.proactis.com
+    documents:
+      - path: /.well-known/agent-card.json
+        status: 404
+        file: null
+      - path: /llms.txt
+        status: 404
+        file: null
+      - path: /.well-known/security.txt
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/openid-configuration
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/oauth-authorization-server
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/api-catalog
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/ai-plugin.json
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+      - path: /.well-known/agent.json
+        status: 403
+        file: null
+        note: Cloudflare managed challenge; origin status not established.
+  - host: apius.proactiscloud.com
+    documents:
+      - path: /.well-known/openid-configuration
+        status: 403
+        file: null
+        note: >-
+          AWS API Gateway rejects every unauthenticated request on this host, including
+          /.well-known paths. Absence cannot be distinguished from access denial.
+      - path: /.well-known/oauth-authorization-server
+        status: 403
+        file: null
+      - path: /.well-known/agent-card.json
+        status: 403
+        file: null
+      - path: /.well-known/security.txt
+        status: 403
+        file: null
+  - host: apiuk.proactiscloud.com
+    documents:
+      - path: /.well-known/openid-configuration
+        status: 403
+        file: null
+      - path: /.well-known/oauth-authorization-server
+        status: 403
+        file: null
+      - path: /.well-known/agent-card.json
+        status: 403
+        file: null
+      - path: /.well-known/security.txt
+        status: 403
+        file: null
+findings:
+  documents_served: 0
+  security_txt: false
+  api_catalog: false
+  agent_card: false
+  llms_txt: false
+  oauth_discovery: false
+notes:
+  - >-
+    The OAuth discovery gap is the substantive one. Proactis runs a real OAuth 2.0 authorization
+    server on Amazon Cognito, and Cognito publishes an OpenID configuration document by default at
+    its own issuer URL — but the Proactis-branded API hosts expose no discovery document, and the
+    Cognito user-pool id is only recoverable by decoding the example JWT in the docs. A client has
+    no supported way to discover the token endpoint programmatically.
+  - >-
+    /llms.txt returns a genuine 404 on the documentation host. Given how much of the Proactis
+    developer surface is prose that reads well and how little of it is machine-readable, an
+    llms.txt would be an unusually high-value, low-cost addition for this provider.

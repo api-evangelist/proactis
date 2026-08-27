@@ -1,0 +1,126 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/using-the-api/transactions/push-transactions
+docs: https://docs.proactis.com/using-the-api/transactions/push-transactions
+provider: Proactis
+providerId: proactis
+name: Proactis push transactions (webhook surface)
+description: >-
+  Proactis ships a real outbound event surface, though it does not call it webhooks. For
+  transactional documents it will POST the document to a customer-specified endpoint each time
+  the document reaches a given status. The delivery target, transport, content type and the
+  credentials Proactis uses to authenticate to the customer are all configured through
+  Communication Settings endpoints in the API itself, one configuration per environment.
+asyncapi_spec: false
+asyncapi_note: >-
+  No AsyncAPI document is published, and no event catalog beyond the prose below. The surface is
+  document-push rather than a general event bus — there are no create/update/delete event types,
+  only "this document reached its export status, here it is".
+surface_type: outbound-document-push
+subscription_model: configuration
+subscription_endpoints: >-
+  Communication Settings endpoints exist per API (Receipt Communication Settings, Requisition
+  Communication Settings, Timecard Communication Settings and equivalents appear in the reference
+  navigation) with methods to set up, retrieve, update and delete endpoint configuration.
+delivery:
+  method: POST
+  trigger: >-
+    The document reaching the correct status. For requisitions, ERP orders, receipts and timecards
+    the triggering status is fixed; for invoices it is configurable.
+  payload_format: cXML
+  default_content_type: application/xml
+  attachments: >-
+    Documents carrying attachments are delivered as a multipart request, default multipart/mixed.
+    The receiving application must be able to parse multipart and extract the document and the
+    attachments separately.
+  multiple_endpoints: >-
+    ERP orders support multiple endpoints, each receiving the same message. Requisitions, receipts,
+    invoices and timecards support exactly one endpoint each.
+  supported_uri_schemes: [http, https, ftp, sftp]
+document_types:
+  - name: Requisition
+    trigger_status: fixed
+    endpoints: 1
+  - name: ERP Order
+    trigger_status: fixed
+    endpoints: multiple
+    extra: Supports additional custom HTTP headers as key/value pairs (ERP orders only).
+  - name: Receipt
+    trigger_status: fixed
+    endpoints: 1
+  - name: Timecard
+    trigger_status: fixed
+    endpoints: 1
+  - name: Invoice
+    trigger_status: configurable
+    endpoints: 1
+    statuses:
+      - CONCEPT
+      - EXCEPTION
+      - FORAPPROVAL
+      - PROCESSED
+      - CLEARED
+      - SENT
+      - ONHOLD
+      - FORVALIDATION
+      - REJECTED
+      - DELETED
+      - ARCHIVED
+      - FOREVALUATION
+    note: >-
+      Invoices can be exported in one or several statuses; the document is pushed once it reaches
+      any configured status.
+not_pushable: >-
+  Only transactional documents can be pushed. All master data — suppliers, accounting structures,
+  users, contracts — must be pulled with a client-initiated GET.
+outbound_authentication:
+  description: >-
+    Zero, one or several authentication types can be combined on a single endpoint; for example
+    OAUTH2 and API_KEY together.
+  types:
+    - type: BASIC
+      fields: [username, password]
+    - type: USERNAME_PASSWORD
+      fields: [username, password]
+      note: For FTP or SFTP targets.
+    - type: OAUTH2
+      fields: [clientId, clientSecret, scope, tokenUrl]
+      note: Client credentials flow only. scope is optional, space-separated for multiples.
+    - type: API_KEY
+      fields: [apiKeyHeaderName, apiKey]
+      note: Header name is configurable rather than fixed.
+configuration_fields:
+  - {name: id, description: 'Unique endpoint name. ERP orders only.'}
+  - {name: url, description: 'Endpoint URI. http://, https://, ftp:// or sftp://.'}
+  - {name: multipartContentType, description: 'Override the default multipart/mixed content type.'}
+  - {name: contentType, description: 'Override the default application/xml content type.'}
+  - {name: authentications, description: 'Zero, one or several authentication blocks.'}
+  - {name: headers, description: 'Additional custom HTTP headers as key/value pairs. ERP orders only.'}
+  - {name: exportStatus, description: 'Invoice export status or statuses. Invoice only.'}
+acknowledgement:
+  required: true
+  format: cXML Response document
+  success: '<Response><Status code="200" text="OK"/></Response>'
+  failure_example: '<Status code="500" text="The incoming cXML is not in a known format">'
+  behaviour: >-
+    Proactis reads the code attribute of the Status element to mark the delivery in the in-product
+    widget. On error, the contents of the Status element are displayed there. If no response, or
+    no valid cXML response, is received the widget shows an error.
+gaps:
+  - >-
+    NO SIGNATURE VERIFICATION. Proactis authenticates itself to the receiver using credentials the
+    receiver supplies, but no payload signing, HMAC, shared secret over the body, or mTLS is
+    documented — so a receiver cannot cryptographically verify that a POST originated from Proactis.
+  - >-
+    NO RETRY OR DELIVERY GUARANTEE IS DOCUMENTED. A failed or unacknowledged delivery is surfaced in
+    a widget for a human to notice. There is no stated retry schedule, no dead-letter behaviour, no
+    replay endpoint and no delivery log an integration can query.
+  - >-
+    NO EVENT CATALOG AND NO ASYNCAPI. The trigger is a document status transition, and for four of
+    the five document types the triggering status is fixed and not stated in the docs.
+  - >-
+    Delivery status is observable only through the in-product widgets, which are a UI surface — an
+    unattended integration has no programmatic way to learn that its endpoint has been failing.
+  - >-
+    ftp:// and http:// are accepted as delivery targets, meaning procurement documents can be
+    configured to leave the platform unencrypted.

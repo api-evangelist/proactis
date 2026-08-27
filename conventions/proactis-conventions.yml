@@ -1,0 +1,247 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/using-the-api/authentication
+provider: Proactis
+providerId: proactis
+name: Proactis API conventions
+description: >-
+  Cross-cutting runtime semantics for the Proactis REST APIs, read from the "Using the API"
+  section of docs.proactis.com. Proactis publishes an unusually complete set of these for a
+  procurement suite — pagination, filtering, ordering, incremental sync, error envelope,
+  rate limits and a formal change policy are all documented — but ships no OpenAPI a client
+  can fetch, and documents no idempotency mechanism.
+docs: https://docs.proactis.com/introduction/
+
+architecture:
+  style: REST
+  transport: HTTPS only — "Calls made over plain HTTP will fail."
+  content_types:
+    request: [application/xml, application/json, 'multipart/mixed (with attachments)']
+    response: [application/xml, application/json]
+  message_standards:
+    - >-
+      cXML — used by most transactional APIs (invoice, order, receipt, requisition, supplier).
+      See conformance/proactis-conformance.yml.
+    - UBL 2.1 — eInvoice API.
+    - SCIM 2.0 — User API.
+    - HR-XML — Timecard API validation endpoint.
+  bulk_operations: >-
+    NOT SUPPORTED. "The Proactis API does not support bulk updates. You can work on only one
+    object per request." This is a hard constraint on any agent or batch integration.
+  docs: https://docs.proactis.com/introduction/
+
+authentication:
+  summary: OAuth 2.0 client credentials bearer token PLUS a fixed x-api-key header, both required.
+  see: authentication/proactis-authentication.yml
+  docs: https://docs.proactis.com/using-the-api/authentication
+
+idempotency:
+  supported: false
+  status: not-documented
+  header: null
+  note: >-
+    Proactis documents no idempotency key, no request-deduplication window, and no safe-retry
+    contract. This matters more than usual here: the rate-limit page explicitly tells clients
+    to "watch for 429 status codes and build in a retry mechanism ... exponential backoff",
+    while the create-transaction flow is an asynchronous POST that returns 200/201/202 before
+    processing completes. A client that retries a POST after a timeout has no documented way
+    to avoid creating a duplicate invoice, order or receipt. cXML payloads do carry a
+    payloadID attribute, but the docs nowhere state that Proactis deduplicates on it.
+  docs: https://docs.proactis.com/using-the-api/troubleshooting/rate-limits
+
+pagination:
+  style: page-number
+  request_params:
+    - name: pageNumber
+      description: Zero-indexed page to return.
+      default: 0
+    - name: pageSize
+      description: Results per page.
+      default: 25
+      maximum: 50
+  response_fields:
+    - pageNumber
+    - pageSize
+    - totalElements
+    - content
+  notes:
+    - >-
+      totalElements reflects the result set AFTER filters are applied, not the total record
+      count — the docs give the worked example of 100 suppliers, 50 online, online=true
+      returning totalElements 50.
+    - >-
+      Proactis recommends a pageSize of 25 rather than the 50 maximum: "The maximum page size
+      is 50 results, which means fewer API calls, but slower responses."
+    - No cursor or token-based pagination is offered.
+  docs: https://docs.proactis.com/using-the-api/pagination
+
+filtering:
+  style: query-parameters
+  example: GET /suppliers/v1/{domainId}?online=true
+  case_sensitive: true
+  pattern_matching: >-
+    Supports string patterns — e.g. name=Pro returns suppliers whose name starts with "Pro".
+  note: Supported filters vary per API; each API's reference lists its own.
+  docs: https://docs.proactis.com/using-the-api/filtering
+
+ordering:
+  params:
+    - name: sortField
+      description: Field to sort on, e.g. invoiceNumber.
+    - name: sortOrder
+      description: asc or desc.
+  docs: https://docs.proactis.com/using-the-api/ordering-results
+
+incremental_sync:
+  param: dateTimeFrom
+  semantics: >-
+    Returns records added or updated since the given timestamp, based on the server-side
+    lastModified value. Every resource carries a lastModified field in its response.
+  example: /suppliers/v1/{domainId}?dateTimeFrom=2023-01-30T00:00&pageNumber=0&pageSize=25
+  guidance: >-
+    Proactis explicitly recommends storing the last-queried timestamp per data type and
+    doing a full pull only once, then polling by dateTimeFrom thereafter.
+  docs: https://docs.proactis.com/using-the-api/using-last-modified-dates
+
+path_conventions:
+  shape: /{resource}/{version}/{domainId}
+  examples:
+    - /suppliers/v1/{domainId}
+    - /accounting/v1
+    - /receipts/v1
+    - /requisitions/v1
+    - /timecards/v1
+    - /scim/v1
+    - /einvoicing
+  tenancy: >-
+    A domainId path segment scopes calls to a Proactis tenant/domain. Region is selected by
+    choosing the correct host, not by a path or header.
+
+versioning:
+  scheme: path
+  current: v1
+  note: >-
+    Service paths are pinned at /v1. The Proactis platform itself is versioned separately on a
+    9.x.y release train (9.6.8 as of August 2026) which is what the changelog tracks; platform
+    releases do not change the API path version.
+  see: lifecycle/proactis-lifecycle.yml
+
+errors:
+  envelope:
+    fields: [status, message, details]
+    formats: [JSON, XML, cXML]
+    example: '{"status":"NOT_FOUND","message":"COSTCENTER with ID \"test\" not found","details":[]}'
+  rfc9457: false
+  note: >-
+    A hand-rolled envelope, not RFC 9457 application/problem+json. `status` is a symbolic
+    name for the HTTP code (NOT_FOUND for 404) rather than a machine-stable error code, so
+    there is no error-code registry a client can branch on.
+  see: errors/proactis-problem-types.yml
+  docs: https://docs.proactis.com/using-the-api/troubleshooting/status-codes
+
+rate_limiting:
+  scope: organization, across all endpoints
+  limits:
+    production: {per_minute: 50, per_day: 8000}
+    uat: {per_minute: 50, per_day: 4000}
+  reset: Daily counter resets at midnight UTC.
+  exhausted_status: 429
+  exhausted_body: '{"message": "Limit Exceeded"}'
+  response_headers: >-
+    NONE DOCUMENTED. Proactis publishes no X-RateLimit-*, RateLimit-* or Retry-After header,
+    so a client cannot read remaining quota at runtime — it can only detect exhaustion after
+    the fact from a 429.
+  exemption: Traffic initiated by Proactis (pushes) does not count toward the client's limit.
+  see: rate-limits/proactis-rate-limits.yml
+  docs: https://docs.proactis.com/using-the-api/troubleshooting/rate-limits
+
+request_id_tracing:
+  supported: partial
+  note: >-
+    No Proactis-branded request id is documented. The published example response carries
+    AWS API Gateway headers (x-amzn-RequestId, x-amz-apigw-id) which are infrastructure
+    identifiers rather than a documented support-correlation contract. Asynchronous
+    processing is instead tracked visually through in-product "widgets".
+  docs: https://docs.proactis.com/introduction/widgets
+
+field_expansion: not supported
+sparse_fieldsets: not supported
+metadata_fields: not supported
+
+reversibility:
+  applicable: true
+  grade: documented
+  summary: >-
+    Proactis exposes real write surfaces and documents a DELETE verb for master data and for
+    SCIM users and groups, so most writes have a reversal path. It states NO window for any of
+    them — no restore period, no undo, no cancellation deadline — so an agent can establish
+    that an action is undoable but not for how long, and in several cases the reversal is
+    conditional on downstream state the caller cannot see before acting.
+  surfaces:
+    - surface: Master data (cost centers, cost accounts, cost dimensions, departments)
+      write: POST create / PUT update
+      reversal: DELETE the record
+      window: not stated
+      note: >-
+        The docs describe create, update and delete as the three supported operations and give
+        upsertCostCenter as the worked create/update example. No soft delete, no restore, and
+        no statement of what happens to transactions already referencing the deleted record.
+      docs: https://docs.proactis.com/using-the-api/master-data/modify-data
+    - surface: Users and groups (SCIM 2.0)
+      write: POST create, PUT/PATCH modify
+      reversal: DELETE the user or group
+      window: not stated
+      conditional: >-
+        STATED PRECONDITION, NOT A WINDOW — "This will only apply to users who have not created
+        or own data in Proactis." A caller cannot determine from the API whether a given user is
+        deletable before attempting it.
+      docs: https://docs.proactis.com/apis/user-api/overview
+    - surface: Suppliers
+      write: POST a cXML supplier document
+      reversal: >-
+        Re-POST with the appropriate OrganizationChangeMessage attribute value; the create,
+        update and delete intents are expressed inside the cXML payload rather than by HTTP verb.
+      window: not stated
+      docs: https://docs.proactis.com/apis/supplier-api/overview
+    - surface: Transactional documents (invoices, orders, receipts, requisitions, timecards)
+      write: POST cXML / UBL document, processed asynchronously
+      reversal: NONE DOCUMENTED
+      window: not applicable
+      note: >-
+        This is the sharpest gap. Imports return 200/201/202 meaning "accepted for processing",
+        with functional errors surfacing later in a widget rather than in the response. No cancel,
+        void, reverse or delete endpoint is documented for an imported transactional document,
+        and no idempotency key exists to make a retry safe. An agent that POSTs a receipt and
+        times out cannot determine whether it landed, cannot retract it, and cannot safely retry.
+      docs: https://docs.proactis.com/using-the-api/transactions/create-transactions
+    - surface: Invoice payment status
+      write: Update entry number and payment date
+      reversal: >-
+        Values can be overwritten by a later request; the prior value is retained in the invoice
+        audit log. Effectively correctable rather than reversible.
+      window: not stated
+      docs: https://docs.proactis.com/apis/invoice-api/overview
+  gaps:
+    - No reversal window, retention period or restore endpoint is stated for any surface.
+    - No cancel/void path for imported transactional documents.
+    - >-
+      Reversibility for suppliers is encoded in a cXML attribute rather than an HTTP verb, so it
+      is invisible to any tooling that reasons about REST semantics alone.
+
+dry_run_mode:
+  supported: partial
+  note: >-
+    Not a general dry-run, but two validation-only endpoints exist in the reference navigation —
+    "Validate Receipt" (Receipt API) and "Validate Time Card HRXML" (Timecard API) — which let a
+    client check a payload before importing it. No equivalent exists for invoices, orders,
+    requisitions, suppliers or master data.
+  docs: https://docs.proactis.com/receipt-api
+
+cross_references:
+  authentication: authentication/proactis-authentication.yml
+  scopes: scopes/proactis-scopes.yml
+  errors: errors/proactis-problem-types.yml
+  rate_limits: rate-limits/proactis-rate-limits.yml
+  lifecycle: lifecycle/proactis-lifecycle.yml
+  webhooks: asyncapi/proactis-webhooks.yml
+  conformance: conformance/proactis-conformance.yml

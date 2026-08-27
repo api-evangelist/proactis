@@ -1,0 +1,112 @@
+generated: '2026-08-27'
+method: derived
+source: https://docs.proactis.com/apis/overview
+provider: Proactis
+providerId: proactis
+name: Proactis MCP server
+status: candidate
+description: >-
+  Proactis ships no MCP server. No hosted endpoint, no stdio package, and no mention of MCP,
+  agents or tool calling anywhere on proactis.com or docs.proactis.com. The tool list below is a
+  DERIVED CANDIDATE — what an MCP server over the documented Proactis API surface would plausibly
+  expose — recorded so the gap is legible. It is not a product, and none of these tools exist.
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: unknown
+  verified: derived
+search_performed:
+  - target: docs.proactis.com
+    query: MCP / Model Context Protocol / agent / tool
+    result: no mention
+  - target: registry.npmjs.org
+    query: proactis
+    result: no package
+  - target: github.com/proactis-documentation
+    result: three repositories, last touched 2019, none MCP-related
+  - target: /.well-known probes on all Proactis hosts
+    result: no agent card, no MCP manifest
+candidate_tools:
+  - name: list_suppliers
+    description: Retrieve a paged, filtered list of suppliers.
+    derived_from: 'GET /suppliers/v1/{domainId}'
+    confidence: high
+  - name: get_supplier
+    description: Retrieve a single supplier by id.
+    derived_from: Supplier API individual retrieval endpoint
+    confidence: medium
+  - name: upsert_supplier
+    description: Create, update or delete a supplier via a cXML OrganizationChangeMessage.
+    derived_from: Supplier API POST
+    confidence: medium
+  - name: list_invoices
+    description: Retrieve a paged, filtered list of invoices.
+    derived_from: Invoice API list endpoint
+    confidence: high
+  - name: get_invoice
+    description: Retrieve a single invoice. Attachments are not returned on GET.
+    derived_from: Invoice API individual retrieval endpoint
+    confidence: high
+  - name: update_invoice_payment
+    description: Set the entry number and payment date on an invoice.
+    derived_from: Invoice API payment endpoint
+    confidence: high
+  - name: import_receipt
+    description: Import a receipt against an existing order.
+    derived_from: 'operationId importReceipt (Receipt API)'
+    confidence: high
+  - name: validate_receipt
+    description: Validate a receipt payload without importing it.
+    derived_from: Validate Receipt operation group in the Receipt API reference
+    confidence: high
+  - name: list_orders
+    description: Retrieve ERP orders.
+    derived_from: Order API
+    confidence: medium
+  - name: list_requisitions
+    description: Retrieve requisitions.
+    derived_from: Requisition API
+    confidence: medium
+  - name: budget_check
+    description: Run a budget check.
+    derived_from: Budget check operation group in the Requisition API reference
+    confidence: medium
+  - name: upsert_cost_center
+    description: Create or update a cost center.
+    derived_from: 'operationId upsertCostCenter (Accounting API)'
+    confidence: high
+  - name: list_cost_centers
+    description: Retrieve cost centers, cost accounts, cost dimensions or departments.
+    derived_from: Accounting API operation groups
+    confidence: high
+  - name: send_invoice
+    description: Import a UBL 2.1 invoice.
+    derived_from: 'operationId sendInvoice (eInvoice API)'
+    confidence: high
+  - name: provision_user
+    description: Create, retrieve, modify or delete a user via SCIM 2.0.
+    derived_from: 'User API /scim/v1 Users'
+    confidence: high
+  - name: manage_group
+    description: Manage department master roles as SCIM groups.
+    derived_from: 'User API /scim/v1 Groups'
+    confidence: high
+  - name: import_timecard
+    description: Import or validate an HR-XML timecard.
+    derived_from: Timecard API operation groups
+    confidence: medium
+  - name: create_contract
+    description: Create a contract.
+    derived_from: Contract API
+    confidence: medium
+blockers:
+  - >-
+    An MCP server over this API could not be built responsibly today without first solving three
+    things Proactis does not currently provide: no fetchable OpenAPI to generate tool schemas from,
+    no idempotency mechanism to make a retried write safe, and no reversal path for imported
+    transactional documents.
+  - >-
+    The 8,000 requests/day organization-wide ceiling with no bulk operations and no rate-limit
+    response headers means an agent would have no runtime signal for how much budget it has left.

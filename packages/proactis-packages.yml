@@ -1,0 +1,73 @@
+generated: '2026-08-27'
+method: searched
+source: >-
+  registry.npmjs.org, pypi.org, rubygems.org, api.nuget.org, crates.io, github.com/proactis-documentation
+provider: Proactis
+providerId: proactis
+name: Proactis client libraries
+description: >-
+  Proactis publishes no client libraries. Every public package registry was searched and the
+  company's GitHub organisation was enumerated; there is no first-party SDK in any language, and
+  no third-party wrapper of note. Integrators build directly against the REST endpoints, hand-
+  assembling cXML, UBL 2.1 and SCIM payloads.
+official_package_count: 0
+community_package_count: 0
+packages: []
+registries_searched:
+  - registry: npm
+    endpoint: https://registry.npmjs.org/-/v1/search
+    queries: [proactis, '@proactis/sdk', proactis-api]
+    result: no Proactis-published package
+  - registry: PyPI
+    endpoint: https://pypi.org/pypi/<name>/json
+    queries: [proactis, proactis-api]
+    result: 404 on both
+  - registry: RubyGems
+    endpoint: https://rubygems.org/api/v1/search.json
+    queries: [proactis]
+    result: empty result set
+  - registry: NuGet
+    endpoint: https://api.nuget.org/v3/registration5-semver1/proactis/index.json
+    result: 404
+  - registry: crates.io
+    endpoint: https://crates.io/api/v1/crates?q=proactis
+    result: empty result set
+  - registry: Maven Central
+    result: not searched — no JVM SDK is referenced anywhere in the Proactis documentation
+github:
+  organization: https://github.com/proactis-documentation
+  public_repos: 3
+  repos:
+    - name: EXproactis-documentation.github.io
+      description: Public Documentation Website
+      last_push: '2018-12-04'
+      contains_sdk: false
+    - name: documentation-source
+      description: Source files for the documentation website (MkDocs)
+      last_push: '2019-01-09'
+      contains_sdk: false
+    - name: ExampleApplications
+      description: Example applications showing how to integrate with the PROACTIS suite of products
+      last_push: '2017-12-19'
+      contains_sdk: false
+      note: >-
+        The closest thing to first-party integration code Proactis has published. Last touched in
+        December 2017, more than five years before the current docs.proactis.com developer site and
+        the current OAuth 2.0 / cXML API surface it documents. It predates the platform it claims
+        to demonstrate and should not be treated as current.
+  assessment: >-
+    The organisation is abandoned. All three repositories stopped receiving commits in 2017-2019,
+    and the live documentation site at docs.proactis.com is not built from any of them. This is a
+    stale pointer, not an active engineering presence.
+findings:
+  - >-
+    No SDK in any language. For a provider whose transactional APIs require correctly-formed cXML
+    1.2.x documents with mandatory-but-unused elements — the published receipt example annotates
+    several fields as "Not used but mandatory by cXML" — the absence of even one reference client
+    puts the entire serialisation burden on every integrator, repeatedly.
+  - >-
+    No CLI, no Postman collection, and no downloadable spec, so there is nothing a developer can
+    import to get a first call working.
+  - >-
+    Because no package exists, there is no release-recency signal to read here; the abandonment
+    evidence for this provider comes from the GitHub organisation instead.

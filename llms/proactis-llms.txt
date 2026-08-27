@@ -1,0 +1,154 @@
+# Proactis
+
+> Proactis is a source-to-pay software provider covering eSourcing, contract management, supplier
+> management, purchase-to-pay, marketplace and accounts payable automation for mid-market and
+> public-sector organisations. Its developer surface is ten separate REST APIs deployed across four
+> regional estates (EU, NL, UK, US), each with paired UAT and production environments.
+
+Generated: 2026-08-27
+Method: generated from apis.yml and the artifacts in this repository, sourced from docs.proactis.com.
+Source: https://docs.proactis.com/
+Note: Proactis does not publish an llms.txt of its own (https://docs.proactis.com/llms.txt returns 404).
+      This file is written by API Evangelist from Proactis's public documentation.
+
+## What you can and cannot do
+
+- There is NO public OpenAPI, Swagger, GraphQL, AsyncAPI or Postman collection. The API reference at
+  docs.proactis.com renders client-side through Stoplight Elements from a specification that is not
+  served as a fetchable file.
+- There is NO self-service signup, no free tier, no public sandbox and no published pricing. OAuth 2.0
+  credentials and the API key are issued only by contacting Proactis support, and only to customers.
+- There is NO MCP server and NO A2A agent card.
+- There are NO client libraries in any language, and NO CLI.
+- Bulk operations are NOT supported: one object per request, on every API.
+
+## Authentication
+
+Two credentials are required together on every request:
+
+- An OAuth 2.0 bearer access token from the client credentials grant (RFC 6749). POST
+  grant_type=client_credentials to the regional host with client id and secret as HTTP Basic
+  credentials. Tokens are Bearer, expire in 3600 seconds, and are issued by Amazon Cognito.
+- A fixed API key in the `x-api-key` header.
+
+Scopes are resource-server URIs under https://api.proactiscloud.com/ — orders, invoices, receipts,
+suppliers, accounting, einvoicing. No scope is published for the contract, requisition, timecard or
+user services. HTTPS is mandatory.
+
+Docs: https://docs.proactis.com/using-the-api/authentication
+
+## Regional hosts
+
+Every API is available in four regions, each with a UAT and a production host.
+
+- EU: https://regos2p-eu1-api-uat.proactiscloud.com (UAT) / https://regos2p-eu1-api.proactiscloud.com
+- NL: https://api-consult.esize.nl (UAT) / https://api.esize.nl
+- UK: https://apiuk-uat.proactiscloud.com (UAT) / https://apiuk.proactiscloud.com
+- US: https://apius-uat.proactiscloud.com (UAT) / https://apius.proactiscloud.com
+
+## APIs
+
+- Accounting API — departments, cost centers, cost accounts, cost dimensions, department addresses.
+  Path /accounting/v1. https://docs.proactis.com/apis/accounting-api/overview
+- Contract API — create contracts. https://docs.proactis.com/apis/contract-api/overview
+- eInvoice API — import UBL 2.1 invoices. Path /einvoicing.
+  https://docs.proactis.com/apis/einvoice-api/overview
+- Invoice API — retrieve invoices, update payment status (entry number, payment date).
+  https://docs.proactis.com/apis/invoice-api/overview
+- Order API — create and retrieve ERP orders. https://docs.proactis.com/apis/order-api/overview
+- Receipt API — import and retrieve receipts, validate receipts. Path /receipts/v1.
+  https://docs.proactis.com/apis/receipt-api/overview
+- Requisition API — retrieve requisitions, budget check. Path /requisitions/v1.
+  https://docs.proactis.com/apis/requisition-api/overview
+- Supplier API — create, modify, retrieve suppliers. Path /suppliers/v1/{domainId}.
+  https://docs.proactis.com/apis/supplier-api/overview
+- Timecard API — create and retrieve timecards, validate HR-XML. Path /timecards/v1.
+  https://docs.proactis.com/apis/timecard-api/overview
+- User API — SCIM 2.0 users and groups (department master roles). Path /scim/v1.
+  https://docs.proactis.com/apis/user-api/overview
+
+## Message standards
+
+- cXML 1.2.x — invoice, order, receipt, requisition and supplier documents.
+- UBL 2.1 — eInvoicing.
+- SCIM 2.0 — users and groups.
+- HR-XML — timecards.
+
+## Request conventions
+
+- Pagination: `pageNumber` (default 0) and `pageSize` (default 25, max 50). Responses carry
+  pageNumber, pageSize, totalElements and content. totalElements reflects filters.
+  https://docs.proactis.com/using-the-api/pagination
+- Filtering: query parameters, case sensitive, string-prefix patterns supported.
+  https://docs.proactis.com/using-the-api/filtering
+- Ordering: `sortField` and `sortOrder` (asc/desc).
+  https://docs.proactis.com/using-the-api/ordering-results
+- Incremental sync: `dateTimeFrom` returns records added or updated since a timestamp; every entity
+  carries `lastModified`. https://docs.proactis.com/using-the-api/using-last-modified-dates
+- Content: XML or JSON for master data; multipart/mixed when attachments are present.
+  https://docs.proactis.com/using-the-api/multipart
+
+## Errors
+
+Envelope: `{"status": "NOT_FOUND", "message": "...", "details": []}` in JSON, XML or cXML. Not RFC 9457.
+`status` mirrors the HTTP code rather than being an independent error code.
+
+Documented statuses: 200, 201, 202, 400, 401, 403, 404, 405, 429, 500, 503.
+Note that 200/201/202 on an import means ACCEPTED FOR PROCESSING, not succeeded — functional errors
+appear afterwards in the in-product widgets, not in the HTTP response.
+
+https://docs.proactis.com/using-the-api/troubleshooting/status-codes
+
+## Rate limits
+
+Enforced per organization across all endpoints, measured per minute AND per day; whichever is hit
+first applies. Production 50/minute and 8000/day; UAT 50/minute and 4000/day. Daily counter resets at
+midnight UTC. Exhaustion returns 429 with `{"message": "Limit Exceeded"}`.
+
+NO rate-limit response headers are returned — no X-RateLimit-*, no RateLimit-*, no Retry-After — so
+there is no runtime signal for remaining quota. Throttled requests are discarded, never queued.
+Traffic Proactis initiates does not count against the limit.
+
+https://docs.proactis.com/using-the-api/troubleshooting/rate-limits
+
+## Retries, idempotency and reversibility
+
+- NO idempotency key or deduplication mechanism is documented, while the docs simultaneously
+  instruct clients to retry 429s with exponential backoff. A retried POST may duplicate a document.
+- Master data and SCIM users/groups support DELETE. SCIM user deletion applies only to users who
+  own no data.
+- Imported transactional documents (invoices, orders, receipts, requisitions, timecards) have NO
+  documented cancel, void or delete path.
+- No reversal window is stated anywhere.
+
+## Push / webhooks
+
+Proactis will POST transactional documents outbound to a customer endpoint when the document reaches
+a given status: requisitions, ERP orders, receipts, invoices and timecards. Configured through
+Communication Settings, once per environment. Payload is cXML; attachments arrive multipart.
+Proactis authenticates to the receiver with BASIC, USERNAME_PASSWORD, OAUTH2 or API_KEY. Invoice
+export status is configurable across twelve states; the other four document types use a fixed status.
+The receiver must return a valid cXML Response whose Status code attribute Proactis reads.
+
+No payload signing and no documented retry or delivery guarantee.
+
+https://docs.proactis.com/using-the-api/transactions/push-transactions
+
+## Change management
+
+Formal change policy enumerating breaking vs non-breaking changes:
+https://docs.proactis.com/using-the-api/change-policy
+Dated changelog, monthly 9.x.y release train, per-region UAT and production calendar in each entry:
+https://docs.proactis.com/changelog
+Current release 9.6.8 (2026-08-01). No deprecation policy, no Sunset/Deprecation headers, no SLA and
+no status page.
+
+## Company
+
+- Website: https://www.proactis.com/
+- Support: https://www.proactis.com/support/
+- Accreditations & certifications (ISO 27001, ISO 9001, Cyber Essentials, ISAE 3402, G-Cloud):
+  https://www.proactis.com/uk/about-us/accreditations-certifications/
+- Terms: https://www.proactis.com/us/customers/contractual-terms-and-conditions/
+- Privacy: https://www.proactis.com/privacy-policy/
+- LinkedIn: https://www.linkedin.com/company/proactis-group

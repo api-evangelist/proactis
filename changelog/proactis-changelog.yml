@@ -1,0 +1,119 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/changelog
+docs: https://docs.proactis.com/changelog
+provider: Proactis
+providerId: proactis
+name: Proactis API changelog
+description: >-
+  Proactis maintains a dated, per-release API changelog on its documentation site, one entry
+  per platform release on a monthly train. Every entry opens with a release calendar giving the
+  UAT and production dates for each of the four regions, then lists changes grouped by API.
+  Releases with no API change say so explicitly rather than being skipped.
+scheme: platform-release
+version_pattern: 9.<minor>.<patch>
+current_version: 9.6.8
+current_version_date: '2026-08-01'
+oldest_published: 9.3.5
+entry_count: 41
+cadence: monthly
+per_entry_release_calendar: true
+regions: [NL, EU1, UK, US]
+breaking_changes_flagged: >-
+  Not as an explicit field. The separate change policy defines what counts as breaking, but
+  individual changelog entries do not carry a breaking/non-breaking label — a reader must
+  classify each change against the policy themselves.
+entries:
+  - version: 9.6.8
+    date: '2026-08-01'
+    url: https://docs.proactis.com/changelog/9.6.8
+    release_calendar:
+      NL: {uat: '2026-08-07', prod: '2026-08-14'}
+      EU1: {uat: '2026-08-11', prod: '2026-08-20'}
+      UK: {uat: '2026-08-11', prod: '2026-08-20'}
+      US: {uat: '2026-08-11', prod: '2026-08-20'}
+    changes:
+      - api: Invoice API
+        type: addition
+        breaking: false
+        title: Improved ISO 8601 date and time support on the payment endpoint
+        summary: >-
+          The payment endpoint now accepts additional ISO 8601 formats including time-zone
+          offsets — yyyy-MM-dd'T'HH:mm:ssZ and yyyy-MM-dd'T'HH:mm:ssXXX are new in this
+          release, alongside the previously supported yyyy-MM-dd'T'HH:mm and
+          yyyy-MM-dd'T'HH:mm:ss. No action required for integrations already sending a
+          supported format.
+      - api: Receipt API
+        type: addition
+        breaking: false
+        title: Receipt comments supported in REST API import and export
+        summary: >-
+          A single header comment can now be supplied on receipt import and existing comments
+          are returned on export, multiple comments separated by line breaks. Stated as
+          restoring parity with existing BizTalk-based integrations.
+  - version: 9.6.7
+    date: '2026-07-01'
+    url: https://docs.proactis.com/changelog/9.6.7
+    release_calendar:
+      NL: {uat: '2026-07-03', prod: '2026-07-10'}
+      EU1: {uat: '2026-07-07', prod: '2026-07-16'}
+      UK: {uat: '2026-07-07', prod: '2026-07-16'}
+      US: {uat: '2026-07-07', prod: '2026-07-16'}
+    changes: []
+    note: No new features or changes were introduced to the API for this release.
+  - version: 9.6.6
+    date: '2026-06-01'
+    url: https://docs.proactis.com/changelog/9.6.6
+    release_calendar:
+      NL: {uat: '2026-06-15', prod: '2026-06-19'}
+      EU1: {uat: '2026-06-16', prod: '2026-06-25'}
+      UK: {uat: '2026-06-16', prod: '2026-06-25'}
+      US: {uat: '2026-06-16', prod: '2026-06-25'}
+    changes: []
+    note: No new features or changes were introduced to the API for this release.
+  - version: 9.6.5
+    date: '2026-05-01'
+    url: https://docs.proactis.com/changelog/9.6.5
+    release_calendar:
+      NL: {uat: '2026-05-08', prod: '2026-05-15'}
+      EU1: {uat: '2026-05-12', prod: '2026-05-21'}
+      UK: {uat: '2026-05-12', prod: '2026-05-21'}
+      US: {uat: '2026-05-12', prod: '2026-05-21'}
+    changes: []
+  - version: 9.6.4
+    date: '2026-04-01'
+    url: https://docs.proactis.com/changelog/9.6.4
+    release_calendar:
+      NL: {uat: '2026-04-10', prod: '2026-04-17'}
+      EU1: {uat: '2026-04-14', prod: '2026-04-23'}
+      UK: {uat: '2026-04-14', prod: '2026-04-23'}
+      US: {uat: '2026-04-14', prod: '2026-04-23'}
+    changes:
+      - api: User API (SCIM)
+        type: behaviour-change
+        breaking: false
+        title: Buyer privilege now inherited automatically on SCIM department master role import
+        summary: >-
+          Where a department master role carries the Buyer access privilege, importing that
+          master role via SCIM now also adds the Buyer role to the user on that department.
+          Previously the user received the master role but could not create requisitions on the
+          department until Buyer was added separately. Follows on from the 9.6.2 SCIM default
+          department master role extension.
+  - version: 9.6.3
+    date: '2026-03-01'
+    url: https://docs.proactis.com/changelog/9.6.3
+    release_calendar:
+      NL: {uat: '2026-03-06', prod: '2026-03-13'}
+      EU1: {uat: '2026-03-10', prod: '2026-03-19'}
+      UK: {uat: '2026-03-10', prod: '2026-03-19'}
+      US: {uat: '2026-03-10', prod: '2026-03-19'}
+    changes: []
+archive: https://docs.proactis.com/changelog/archive
+notes:
+  - >-
+    Recent window only. 41 entries are published in total, spanning 9.3.5 to 9.6.8; the six most
+    recent are structured here.
+  - >-
+    Three of the six most recent releases carried no API change at all. The API surface is stable
+    and slow-moving, with changes concentrated in the Invoice, Receipt and SCIM/User services.
+  - No RSS or Atom feed is offered for the changelog.

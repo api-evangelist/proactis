@@ -1,0 +1,123 @@
+generated: '2026-08-27'
+method: searched
+source: https://docs.proactis.com/using-the-api/troubleshooting/status-codes
+docs: https://docs.proactis.com/using-the-api/troubleshooting/status-codes
+provider: Proactis
+providerId: proactis
+name: Proactis API error catalog
+description: >-
+  Proactis publishes a single status-code table covering every one of its REST APIs, plus a
+  three-field error envelope rendered in JSON, XML or cXML. There is no per-error code
+  registry below the HTTP status level.
+format: custom
+rfc9457: false
+media_types: [application/json, application/xml, 'text/xml (cXML)']
+envelope:
+  fields:
+    - name: status
+      type: string
+      description: >-
+        A short symbolic identifier corresponding to the HTTP status code returned — the docs
+        give NOT_FOUND as the value accompanying a 404. It is a restatement of the HTTP status,
+        not an independent error code.
+      stable: true
+    - name: message
+      type: string
+      description: >-
+        Human-readable explanation, including resolution detail where possible. Example from the
+        docs - 'COSTCENTER with ID "test" not found'.
+      stable: false
+    - name: details
+      type: string
+      description: Optional. Some endpoints add extra detail; often an empty array.
+      required: false
+  example_json: '{"status":"NOT_FOUND","message":"COSTCENTER with ID \"test\" not found","details":[]}'
+problem_types:
+  - status: 400
+    title: Bad Request
+    identifier: BAD_REQUEST
+    detail: The server is unable to process the request because of invalid information in the request.
+    remediation: >-
+      Validate the payload against the data model for that API before sending. The Receipt and
+      Timecard APIs offer validation-only endpoints for this purpose.
+    retryable: false
+  - status: 401
+    title: Unauthorized
+    identifier: UNAUTHORIZED
+    detail: The supplied OAuth 2.0 token or API-key is missing, incorrect or expired.
+    remediation: >-
+      Request a fresh access token via the client credentials grant (tokens expire after 3600
+      seconds) and confirm the x-api-key header is present. Both credentials are required.
+    retryable: true
+  - status: 403
+    title: Forbidden
+    identifier: FORBIDDEN
+    detail: You are using an API which your OAuth 2.0 token does not have access to.
+    remediation: >-
+      The token is missing the resource-server scope for that service — see
+      scopes/proactis-scopes.yml. Scope grants are set at client registration by Proactis support.
+    retryable: false
+  - status: 404
+    title: Not Found
+    identifier: NOT_FOUND
+    detail: The requested item could not be found.
+    remediation: Confirm the resource id and the domainId path segment.
+    retryable: false
+  - status: 405
+    title: Method Not Allowed
+    identifier: METHOD_NOT_ALLOWED
+    detail: You are attempting to use an unauthorized method.
+    remediation: >-
+      Use POST to create and PUT to update, per the documented convention; not every resource
+      supports every verb.
+    retryable: false
+  - status: 429
+    title: Too Many Requests
+    identifier: TOO_MANY_REQUESTS
+    detail: You have made too many requests in a given amount of time; please retry later.
+    body: '{"message": "Limit Exceeded"}'
+    remediation: >-
+      Back off exponentially and retry. Proactis does NOT queue or replay throttled requests —
+      "Proactis will not store and process these requests at a later time." No Retry-After or
+      RateLimit-* header is returned, so the client must choose its own backoff.
+    retryable: true
+  - status: 500
+    title: Internal Server Error
+    identifier: INTERNAL_SERVER_ERROR
+    detail: There is a problem with our server. Please try again later.
+    remediation: Retry with backoff; escalate to Proactis support if persistent.
+    retryable: true
+  - status: 503
+    title: Service Unavailable
+    identifier: SERVICE_UNAVAILABLE
+    detail: The Proactis API is temporarily offline for maintenance. Please try again later.
+    remediation: >-
+      Retry with backoff. Planned maintenance corresponds to the regional release calendar
+      published per changelog entry — see changelog/proactis-changelog.yml.
+    retryable: true
+success_codes:
+  - status: 200
+    title: Success
+  - status: 201
+    title: Created
+  - status: 202
+    title: Accepted
+asynchronous_semantics:
+  note: >-
+    For push and import operations a 200, 201 or 202 means the request has been ACCEPTED for
+    processing, not that processing succeeded. Functional errors surface afterwards in the
+    Proactis widgets rather than in the HTTP response.
+  push_response_contract: >-
+    When Proactis pushes a document to a customer endpoint it expects a valid cXML Response back
+    and reads the Status element's code attribute. code="200" text="OK" marks the delivery
+    successful in the widget; any other code renders the Status element's contents as the error.
+    A missing or invalid cXML response is shown as an error.
+  docs: https://docs.proactis.com/using-the-api/transactions/push-transactions
+gaps:
+  - >-
+    No error-code registry. `status` merely mirrors the HTTP status, so two different 400s are
+    indistinguishable to a client without parsing the free-text `message`.
+  - >-
+    Functional (business-rule) failures are not returned to the caller at all — they appear in an
+    in-product widget, which no integration or agent can read programmatically.
+  - Not RFC 9457; no type URI, no problem+json media type.
