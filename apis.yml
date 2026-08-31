@@ -41,6 +41,19 @@ image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/proactis.p
 tags:
   - Procurement
   - Purchase-To-Pay
+  - Source-to-Pay
+  - Spend Management
+  - Contract Management
+  - E-Invoicing
+  - Accounts Payable
+  - Supplier Management
+  - eSourcing
+  - cXML
+  - UBL
+  - SCIM
+tags_raw:
+  - Procurement
+  - Purchase-To-Pay
   - Source-To-Pay
   - Spend Management
   - Contract Management
@@ -102,6 +115,10 @@ apis:
     humanURL: https://docs.proactis.com/apis/einvoice-api/overview
     baseURL: https://apiuk.proactiscloud.com/einvoicing
     tags:
+      - E-Invoicing
+      - UBL
+      - Accounts Payable
+    tags_raw:
       - eInvoicing
       - UBL
       - Accounts Payable
