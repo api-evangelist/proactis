@@ -206,6 +206,10 @@ apis:
     tags:
       - Requisitions
       - Purchase-To-Pay
+      - Budgets
+    tags_raw:
+      - Requisitions
+      - Purchase-To-Pay
       - Budget
     properties:
       - type: Documentation
