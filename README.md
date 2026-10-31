@@ -1,4 +1,4 @@
-# Proactis (proactis)
+# Proactis
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -64,42 +64,141 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Proactis provides procurement and spend management solutions including purchase-to-pay, e-sourcing, contract management, and spend analytics software for organizations.
+Proactis is a source-to-pay software provider whose platform covers eSourcing, contract management, supplier management, purchase-to-pay, marketplace and accounts payable automation for mid-market and public-sector organisations. Its developer surface is a set of ten separate REST APIs — accounting, contract, eInvoice, invoice, order, receipt, requisition, supplier, timecard and user — documented at docs.proactis.com and deployed across four regional environments (EU, NL, UK and US), each with a paired UAT and production estate. The APIs are standards-based rather than proprietary: transactional documents move as cXML, electronic invoices as UBL 2.1, identity and department master roles as SCIM 2.0, and timecards as HR-XML, all behind OAuth 2.0 client-credentials tokens paired with a fixed API key. Proactis also pushes transactional documents outbound to customer-configured endpoints. Access is gated: credentials are issued only by Proactis support, and no machine-readable contract is published.
 
-**URL:** [Visit APIs.json URL](https://raw.githubusercontent.com/api-evangelist/proactis/refs/heads/main/apis.yml)
+**Areas:** Procurement · Purchase-To-Pay · Source-to-Pay · Spend Management · Contract Management · E-Invoicing · Accounts Payable · Supplier Management · eSourcing · cXML · UBL · SCIM
 
-## Tags:
+## Proactis on APIs.io
 
- - Contract Management, Procurement, Purchase-To-Pay, Spend Management
+Everything profiled for Proactis is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/proactis/](https://apis.io/providers/proactis/)** — or go straight to one of the APIs or properties below.
 
-## Timestamps
+### APIs (10)
 
-- **Created:** 2026-03-16
-- **Modified:** 2026-03-16
+- [Proactis Accounting API](https://apis.io/apis/proactis/proactis-accounting/) — Configure the accounting structures that spend is coded against — departments, cost centers, cost accounts and cost dimensions, plus department addresses.…
+- [Proactis Contract API](https://apis.io/apis/proactis/proactis-contract/) — Create contracts in Proactis from an external system. The narrowest of the ten services — creation is the only capability the public documentation describes.
+- [Proactis eInvoice API](https://apis.io/apis/proactis/proactis-einvoice/) — Import electronic invoices created in another application into Proactis as OASIS UBL 2.1 documents. Each invoice requires at least one line item; the API…
+- [Proactis Invoice API](https://apis.io/apis/proactis/proactis-invoice/) — Retrieve invoices from Proactis, receive them pushed to your own endpoint as they reach a configured status, and write back payment information. Entry…
+- [Proactis Order API](https://apis.io/apis/proactis/proactis-order/) — Create ERP orders in Proactis and retrieve them, or have them pushed outbound as cXML. The order service is the only one that supports multiple push…
+- [Proactis Receipt API](https://apis.io/apis/proactis/proactis-receipt/) — Import goods receipts against existing orders and retrieve them. Receipts are posted as cXML ReceiptRequest documents referencing an order and line number,…
+- [Proactis Requisition API](https://apis.io/apis/proactis/proactis-requisition/) — Retrieve requisitions, receive them pushed outbound, and run budget checks. Both an import and an export cXML definition are published, and requisition…
+- [Proactis Supplier API](https://apis.io/apis/proactis/proactis-supplier/) — Create, modify, delete and retrieve suppliers. Retrieval is paged and filterable — online status, name prefix and last-modified date are all supported query…
+- [Proactis Timecard API](https://apis.io/apis/proactis/proactis-timecard/) — Create and retrieve timecards, with a dedicated HR-XML validation endpoint and timecard import operations. Timecards are one of the five document types…
+- [Proactis User API (SCIM 2.0)](https://apis.io/apis/proactis/proactis-user/) — Provision users and department master roles into Proactis using SCIM 2.0. Users support POST, GET with filtering and pagination, PATCH or PUT, and DELETE —…
 
-## APIs
+### Published properties
 
-### Proactis API
-Proactis procurement and spend management API for purchase-to-pay, sourcing, and contract management.
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-**Human URL:** [https://www.proactis.com/](https://www.proactis.com/)
+#### AsyncAPI (1)
 
-#### Tags:
+Event-driven and webhook contracts.
 
- - Procurement, Spend Management
+- [Proactis Webhooks](https://apis.io/asyncapis/proactis/proactis-webhooks/)
 
-#### Properties
+#### MCP servers (1)
 
-- [Documentation](https://www.proactis.com/)
+Model Context Protocol servers that expose the API to agents.
 
-## Common Properties
+- [Proactis MCP server](https://apis.io/servers/proactis/proactis-mcp-server/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Proactis Authentication](https://apis.io/security/proactis/proactis-authentication/)
+- [Proactis Domain Security](https://apis.io/security/proactis/proactis-domain-security/)
+- [Proactis Trust Center](https://apis.io/security/proactis/proactis-trust-center/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Proactis Scopes](https://apis.io/scopes/proactis/proactis-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Proactis Plans Pricing](https://apis.io/plans/proactis/proactis-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Proactis Rate Limits](https://apis.io/rate-limits/proactis/proactis-rate-limits/)
+
+#### FinOps (1)
+
+What the API costs to run, by operation.
+
+- [Proactis Finops](https://apis.io/finops/proactis/proactis-finops/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
 - [Website](https://www.proactis.com/)
+- [Documentation](https://docs.proactis.com/)
+- [Getting started](https://docs.proactis.com/introduction/)
+- [API reference](https://docs.proactis.com/apis/overview)
 - [Support](https://www.proactis.com/support/)
-- [Privacy Policy](https://www.proactis.com/privacy-policy/)
+- [Blog](https://www.proactis.com/uk/resources/?group=resource-type&categoryIds=1568)
+- [Compliance](https://www.proactis.com/uk/about-us/accreditations-certifications/)
+- [Terms of service](https://www.proactis.com/us/customers/contractual-terms-and-conditions/)
+- [Privacy policy](https://www.proactis.com/privacy-policy/)
+- [GitHub](https://github.com/proactis-documentation)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
+**Kin Score 52.5** — developing · rubric 0.25.0 · scored 2026-10-23
 
-**Email:** kin@apievangelist.com
+| Facet | Score |
+|---|---|
+| Discoverability | 78.6 |
+| Contract quality | 50.5 |
+| Contract governance | 18.2 |
+| Operational transparency | 57.9 |
+| Developer ergonomics | 64.3 |
+| Access clarity | 28.9 |
+
+**Agent readiness 26.4** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | documented (partial credit) |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 39.2** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/proactis/](https://apis.io/providers/proactis/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Proactis: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/proactis/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
